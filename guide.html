@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CFA L1">
+<meta name="theme-color" content="#0f0e0c">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>CFA Level I — Schweser 2025 Concept Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f0e0c;--bg2:#181714;--bg3:#211f1b;
+    --accent:#c9a84c;--accent2:#e8c97a;
+    --text:#e8e4dc;--text2:#a09890;--text3:#6b6358;
+    --border:#2e2b26;
+    --green:#7ab87a;--blue:#7ab0c8;--red:#c87a7a;--purple:#a87ac8;--orange:#c8a07a;
+    --star:#f0c040;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:300;line-height:1.7;min-height:100vh;}
+
+  header{border-bottom:1px solid var(--border);padding:1.5rem 2.5rem;position:sticky;top:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;}
+  .header-left h1{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--accent);}
+  .header-left p{font-size:0.7rem;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin-top:0.15rem;}
+  .header-right{display:flex;align-items:center;gap:1rem;}
+  .legend{display:flex;align-items:center;gap:0.4rem;font-size:0.7rem;color:var(--text3);}
+  .legend-star{color:var(--star);}
+  .search-wrap{max-width:280px;}
+  #search{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.5rem 0.9rem;font-family:'Inter',sans-serif;font-size:0.82rem;outline:none;border-radius:2px;transition:border-color .2s;}
+  #search:focus{border-color:var(--accent);}
+  #search::placeholder{color:var(--text3);}
+
+  .filter-row{display:flex;gap:.4rem;padding:.55rem 2.5rem;border-bottom:1px solid var(--border);background:var(--bg);align-items:center;flex-wrap:wrap;}
+  .filter-btn{background:none;border:1px solid var(--border);color:var(--text2);font-family:'Inter',sans-serif;font-size:.7rem;padding:.28rem .65rem;cursor:pointer;border-radius:2px;transition:all .15s;}
+  .filter-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .filter-btn.active{background:rgba(201,168,76,.15);border-color:var(--accent);color:var(--accent);}
+  .filter-label{font-size:.67rem;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-right:.2rem;}
+
+  .stats-bar{display:flex;gap:2rem;padding:.6rem 2.5rem;border-bottom:1px solid var(--border);background:var(--bg2);}
+  .stat{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--text3);}
+  .stat span{color:var(--accent);margin-right:.2rem;}
+
+  .container{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 130px);}
+  aside{border-right:1px solid var(--border);padding:1rem 0;position:sticky;top:130px;height:calc(100vh - 130px);overflow-y:auto;}
+  .subject-btn{display:block;width:100%;text-align:left;padding:.48rem 1.1rem;background:none;border:none;color:var(--text2);font-family:'Inter',sans-serif;font-size:.73rem;cursor:pointer;transition:all .15s;border-left:2px solid transparent;line-height:1.4;}
+  .subject-btn:hover{color:var(--text);background:var(--bg3);}
+  .subject-btn.active{color:var(--accent);border-left-color:var(--accent);background:var(--bg2);}
+  .subject-count{float:right;font-family:'DM Mono',monospace;font-size:.65rem;color:var(--text3);}
+
+  main{padding:1.8rem 2.5rem;overflow-y:auto;}
+  .subject-section{display:none;}
+  .subject-section.active{display:block;}
+  .section-header{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.2rem;padding-bottom:.7rem;border-bottom:1px solid var(--border);}
+  .section-title{font-family:'DM Serif Display',serif;font-size:1.7rem;color:var(--text);}
+  .section-tag{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;padding:.16rem .45rem;border:1px solid var(--border);color:var(--text3);border-radius:2px;}
+  .reading-group{margin-bottom:1.8rem;}
+  .reading-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.18em;color:var(--text3);text-transform:uppercase;margin-bottom:.6rem;padding-left:.3rem;border-left:2px solid var(--border);}
+
+  .concept-grid{display:flex;flex-direction:column;gap:.75rem;}
+  .concept-card{background:var(--bg2);border:1px solid var(--border);border-radius:3px;overflow:hidden;transition:border-color .2s;}
+  .concept-card:hover{border-color:rgba(201,168,76,.4);}
+  .concept-card.is-star{border-left:3px solid var(--star);}
+
+  .card-header{padding:.85rem 1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+  .card-header:hover{background:var(--bg3);}
+  .name-row{display:flex;align-items:center;gap:.45rem;}
+  .star-badge{color:var(--star);font-size:.95rem;flex-shrink:0;}
+  .concept-name{font-family:'DM Serif Display',serif;font-size:1.03rem;color:var(--accent2);}
+  .concept-sub{font-size:.73rem;color:var(--text3);margin-top:.08rem;}
+  .expand-icon{color:var(--text3);font-size:.8rem;transition:transform .2s;flex-shrink:0;}
+  .concept-card.expanded .expand-icon{transform:rotate(180deg);}
+
+  .card-body{display:none;padding:0 1.1rem 1.1rem;border-top:1px solid var(--border);}
+  .concept-card.expanded .card-body{display:block;}
+  .section-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-top:.9rem;margin-bottom:.35rem;}
+  .definition{font-size:.83rem;color:var(--text);line-height:1.85;}
+  .formula-box{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--accent);padding:.65rem .85rem;font-family:'DM Mono',monospace;font-size:.75rem;color:var(--accent2);line-height:1.95;border-radius:0 2px 2px 0;white-space:pre-wrap;}
+  .example-box{background:var(--bg);border:1px solid var(--border);padding:.8rem .95rem;border-radius:3px;}
+  .example-q{font-size:.8rem;color:var(--text);margin-bottom:.65rem;line-height:1.7;}
+  .example-a{font-size:.78rem;color:var(--green);padding-top:.55rem;border-top:1px solid var(--border);line-height:1.7;}
+  .tag-row{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.45rem;}
+  .tag{font-size:.62rem;padding:.1rem .4rem;border-radius:2px;font-family:'DM Mono',monospace;}
+  .tag-blue{background:rgba(122,176,200,.1);color:var(--blue);border:1px solid rgba(122,176,200,.22);}
+  .tag-green{background:rgba(122,184,122,.1);color:var(--green);border:1px solid rgba(122,184,122,.22);}
+  .tag-orange{background:rgba(200,160,122,.1);color:var(--orange);border:1px solid rgba(200,160,122,.22);}
+  .tag-purple{background:rgba(168,122,200,.1);color:var(--purple);border:1px solid rgba(168,122,200,.22);}
+  .tag-red{background:rgba(200,122,122,.1);color:var(--red);border:1px solid rgba(200,122,122,.22);}
+  .tag-star{background:rgba(240,192,64,.1);color:var(--star);border:1px solid rgba(240,192,64,.25);}
+
+  .no-results{text-align:center;padding:4rem;color:var(--text3);font-size:.88rem;display:none;}
+  .sim-chips{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.35rem;}
+  .sim-chip{background:var(--bg3);border:1px solid var(--border);color:var(--accent);font-family:'DM Mono',monospace;font-size:.65rem;padding:.22rem .55rem;border-radius:2px;cursor:pointer;transition:all .15s;text-align:left;}
+  .sim-chip:hover{background:rgba(201,168,76,.15);border-color:var(--accent);transform:translateY(-1px);}
+  .sim-chip::before{content:'→ ';opacity:.5;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>CFA Level I — 2025</h1>
+    <p>Schweser Notes · Full Concept Reference</p>
+  </div>
+  <div class="header-right">
+    <div class="legend"><span class="legend-star">★</span><span>My notes</span></div>
+    <div class="search-wrap">
+      <input type="text" id="search" placeholder="Search... (e.g. Duration, WACC, Repo)">
+    </div>
+  </div>
+</header>
+
+<div class="filter-row">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+  <button class="filter-btn" onclick="setFilter('star',this)">★ My Notes</button>
+  <button class="filter-btn" onclick="setFilter('new',this)">Schweser Added</button>
+  <button class="filter-btn" onclick="setFilter('freq',this)">High Frequency</button>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><span id="total-count">0</span> concepts</div>
+  <div class="stat"><span id="star-count">0</span> ★ my notes</div>
+  <div class="stat"><span>4</span> books · <span>10</span> subjects</div>
+</div>
+
+<div class="container">
+<aside>
+  <button class="subject-btn active" onclick="showSubject('all',this)">All Subjects <span class="subject-count" id="cnt-all">—</span></button>
+  <button class="subject-btn" onclick="showSubject('quant',this)">Quantitative Methods <span class="subject-count" id="cnt-quant">—</span></button>
+  <button class="subject-btn" onclick="showSubject('economics',this)">Economics <span class="subject-count" id="cnt-economics">—</span></button>
+  <button class="subject-btn" onclick="showSubject('fra',this)">Financial Reporting <span class="subject-count" id="cnt-fra">—</span></button>
+  <button class="subject-btn" onclick="showSubject('corp',this)">Corporate Finance <span class="subject-count" id="cnt-corp">—</span></button>
+  <button class="subject-btn" onclick="showSubject('equity',this)">Equity Investments <span class="subject-count" id="cnt-equity">—</span></button>
+  <button class="subject-btn" onclick="showSubject('fi',this)">Fixed Income <span class="subject-count" id="cnt-fi">—</span></button>
+  <button class="subject-btn" onclick="showSubject('deriv',this)">Derivatives <span class="subject-count" id="cnt-deriv">—</span></button>
+  <button class="subject-btn" onclick="showSubject('alt',this)">Alternative Investments <span class="subject-count" id="cnt-alt">—</span></button>
+  <button class="subject-btn" onclick="showSubject('pm',this)">Portfolio Management <span class="subject-count" id="cnt-pm">—</span></button>
+  <button class="subject-btn" onclick="showSubject('ethics',this)">Ethics & Standards <span class="subject-count" id="cnt-ethics">—</span></button>
+</aside>
+
+<main>
+<div class="no-results" id="no-results">No matching concepts found.</div>
+
+<section class="subject-section active" id="sec-quant"><div class="section-header"><h2 class="section-title">Quantitative Methods</h2><span class="section-tag">Book 1 · R1–R11</span></div><div id="grid-quant"></div></section>
+<section class="subject-section" id="sec-economics"><div class="section-header"><h2 class="section-title">Economics</h2><span class="section-tag">Book 1 · R12–R19</span></div><div id="grid-economics"></div></section>
+<section class="subject-section" id="sec-fra"><div class="section-header"><h2 class="section-title">Financial Reporting & Analysis</h2><span class="section-tag">Book 2 · R27–R38</span></div><div id="grid-fra"></div></section>
+<section class="subject-section" id="sec-corp"><div class="section-header"><h2 class="section-title">Corporate Finance</h2><span class="section-tag">Book 2 · R20–R26</span></div><div id="grid-corp"></div></section>
+<section class="subject-section" id="sec-equity"><div class="section-header"><h2 class="section-title">Equity Investments</h2><span class="section-tag">Book 2 · R39–R46</span></div><div id="grid-equity"></div></section>
+<section class="subject-section" id="sec-fi"><div class="section-header"><h2 class="section-title">Fixed Income</h2><span class="section-tag">Book 3 · R47–R62</span></div><div id="grid-fi"></div></section>
+<section class="subject-section" id="sec-deriv"><div class="section-header"><h2 class="section-title">Derivatives</h2><span class="section-tag">Book 3 · R63–R75</span></div><div id="grid-deriv"></div></section>
+<section class="subject-section" id="sec-alt"><div class="section-header"><h2 class="section-title">Alternative Investments</h2><span class="section-tag">Book 4 · R76–R82</span></div><div id="grid-alt"></div></section>
+<section class="subject-section" id="sec-pm"><div class="section-header"><h2 class="section-title">Portfolio Management</h2><span class="section-tag">Book 4 · R83–R88</span></div><div id="grid-pm"></div></section>
+<section class="subject-section" id="sec-ethics"><div class="section-header"><h2 class="section-title">Ethics & Professional Standards</h2><span class="section-tag">Book 4 · R89–R96</span></div><div id="grid-ethics"></div></section>
+</main>
+</div>
+
+<script>
+// star: my original notes  freq: high-frequency exam topic  src: 'schweser' = added from book
+const C=[
+// ══ QUANT R1 ══
+{id:'q1',s:'quant',star:true,freq:true,src:'both',r:'R1',
+ name:'Time-Weighted vs. Money-Weighted Return',sub:'Performance measurement — R1',
+ def:'Time-weighted return (TWR): compound growth rate that eliminates the impact of external cash flows. Preferred for evaluating manager performance since managers rarely control client cash flow timing.\n\nMoney-weighted return (MWR): the IRR of all cash flows into and out of the portfolio. Reflects the actual investor experience — influenced by timing of contributions and withdrawals.',
+ formula:'TWR: multiply (1+HPR) for each sub-period, then take geometric mean\nMWR: IRR such that PV(inflows) = PV(outflows)\n\nIf funds added BEFORE poor performance: MWR < TWR\nIf funds added BEFORE strong performance: MWR > TWR\n\nHolding Period Return (HPR) = (P₁ − P₀ + D) / P₀',
+ q:'An investor buys 1 share at $100 (t=0), buys 1 more at $120 (t=1), then sells both at $130 (t=2). Dividends = $2/share/year. Compare TWR and MWR.',
+ a:'TWR: HPR₁=(122-100)/100=22%, HPR₂=(264-242)/242≈9.1%. TWR=√(1.22×1.091)−1≈15.4%. MWR (IRR on net flows): CF₀=−100, CF₁=−118, CF₂=+264 → IRR≈13.9%. MWR<TWR because more money was invested before the lower-return period.',
+ tags:[['red','★ Exam Favorite'],['blue','R1']]},
+
+{id:'q1b',s:'quant',star:false,freq:true,src:'schweser',r:'R1',
+ name:'Interest Rate Components',sub:'Nominal rate decomposition — R1',
+ def:'The nominal interest rate can be decomposed into components reflecting different sources of risk and the time value of money.',
+ formula:'Nominal rate ≈ Real risk-free rate + Expected inflation\n  + Default risk premium + Liquidity premium + Maturity premium\n\nReal risk-free rate: pure time preference for present vs. future consumption\nMaturity premium: compensation for interest rate risk on longer-dated bonds',
+ q:'A bond has a nominal YTM of 7%. If real risk-free rate = 2%, expected inflation = 3%, default risk premium = 1%, what does this imply?',
+ a:'Sum of components = 2+3+1 = 6%. The remaining 1% must be attributable to liquidity and/or maturity premium.',
+ tags:[['blue','R1'],['orange','Interest Rates']]},
+
+{id:'q1c',s:'quant',star:false,freq:true,src:'schweser',r:'R1',
+ name:'Arithmetic, Geometric & Harmonic Mean',sub:'Return averaging methods — R1',
+ def:'Three averaging methods serve different purposes:\n• Arithmetic mean: simple average; best single-period estimate\n• Geometric mean: compound return over multiple periods; accounts for volatility drag\n• Harmonic mean: used for average cost of securities bought in equal dollar amounts (dollar-cost averaging)',
+ formula:'Arithmetic Mean = (R₁+R₂+…+Rₙ)/n\nGeometric Mean = [(1+R₁)(1+R₂)…(1+Rₙ)]^(1/n) − 1\nHarmonic Mean = n / Σ(1/Xᵢ)\n\nGeometric ≤ Arithmetic always (equal only if all returns identical)\nDifference ≈ σ²/2 (larger variance → larger gap)',
+ q:'Returns over 2 years: +50% and −50%. Arithmetic mean = 0%. What is geometric mean?',
+ a:'Geometric mean = √(1.5 × 0.5) − 1 = √0.75 − 1 ≈ −13.4%. The investor actually lost money — geometric mean is more accurate for multi-period performance.',
+ tags:[['red','★ Exam Favorite'],['blue','R1']]},
+
+// ══ QUANT R2 ══
+{id:'q2',s:'quant',star:true,freq:true,src:'both',r:'R2',
+ name:'NPV & IRR',sub:'Discounted cash flow valuation — R2',
+ def:'NPV: the sum of discounted future cash flows minus initial outlay. A positive NPV creates value.\nIRR: the discount rate that makes NPV = 0. Accept if IRR > required rate.',
+ formula:'NPV = Σ [CFt / (1+r)^t] − CF₀\nIRR: solve for r where NPV = 0\nGordon Growth (constant dividend): V₀ = D₁/(r−g)\n\n✓ Mutually exclusive projects → use NPV (IRR can give wrong ranking)\n✓ Non-conventional cash flows → multiple IRRs possible',
+ q:'Project: CF₀=−$1,000, CF₁=$400, CF₂=$500, CF₃=$400. r=10%. Accept or reject?',
+ a:'PV = 400/1.1 + 500/1.21 + 400/1.331 = 363.6+413.2+300.5 = $1,077.3. NPV = $1,077.3−$1,000 = +$77.3 → Accept.',
+ tags:[['red','★ Exam Favorite'],['blue','R2']]},
+
+{id:'q2b',s:'quant',star:false,freq:true,src:'schweser',r:'R2',
+ name:'Cash Flow Additivity Principle',sub:'No-arbitrage pricing — R2',
+ def:'The present value of any set of cash flows can be decomposed any way and the sum of the parts equals the PV of the whole. This is the foundation of no-arbitrage pricing: two sets of identical future cash flows must sell for the same price today.',
+ formula:'PV(CF_A + CF_B) = PV(CF_A) + PV(CF_B)\n\nApplication: Bond price = PV(coupons) + PV(principal)\nNo-arbitrage: if two portfolios produce identical cash flows,\n  they must have the same current price',
+ q:'A 3-year bond paying $50/year and $1,000 at maturity. How do you apply cash flow additivity to price it?',
+ a:'Price = PV($50 at t=1) + PV($50 at t=2) + PV($1,050 at t=3). Each coupon and the principal are priced separately and summed — equivalent to treating each as a zero-coupon bond.',
+ tags:[['blue','R2'],['orange','No-Arbitrage']]},
+
+// ══ QUANT R3 ══
+{id:'q3',s:'quant',star:true,freq:true,src:'both',r:'R3',
+ name:'Downside Deviation & Coefficient of Variation',sub:'Dispersion and risk measures — R3',
+ def:'Downside Deviation (Target Semideviation): measures volatility of returns below a target — captures only the "bad" risk.\nCoefficient of Variation (CV): standard deviation per unit of expected return; allows risk comparison across investments with different return levels.',
+ formula:'Downside Dev = √[Σ(Rᵢ−Target)² / n] (only when Rᵢ < Target)\nCV = σ / E(R)  →  lower is more efficient\n\nMAD = Σ|Xᵢ−X̄| / n\nVariance = Σ(Xᵢ−X̄)² / (n−1)  [sample]\nRange = Max − Min',
+ q:'Stock A: E(R)=10%, σ=15%. Stock B: E(R)=20%, σ=25%. Which has lower relative risk?',
+ a:'CV_A=15/10=1.5, CV_B=25/20=1.25. Stock B is more efficient on a risk-per-return basis.',
+ tags:[['red','★ Exam Favorite'],['blue','R3']]},
+
+{id:'q3b',s:'quant',star:false,freq:true,src:'schweser',r:'R3',
+ name:'Skewness & Kurtosis',sub:'Distribution shape — R3',
+ def:'Skewness: measures asymmetry of a distribution. Kurtosis: measures peak height and tail thickness relative to normal distribution.',
+ formula:'Positive (right) skew: mean > median > mode\n  Long tail to the right; more frequent small losses, rare large gains\nNegative (left) skew: mean < median < mode\n  Long tail to the left; more frequent small gains, rare large losses\n\nKurtosis:\n  Excess kurtosis = kurtosis − 3\n  Leptokurtic (excess >0): fat tails, higher peak — more extreme events\n  Platykurtic (excess <0): thin tails, lower peak\n  Normal: excess kurtosis = 0',
+ q:'A return distribution has negative skewness and excess kurtosis of +2. What does this imply for risk?',
+ a:'Negative skew → large negative returns more probable than large positive. Positive excess kurtosis → fat tails → more extreme events than normal distribution. Combined: higher tail risk on the downside.',
+ tags:[['green','High-Frequency'],['blue','R3']]},
+
+// ══ QUANT R4–R5 ══
+{id:'q4',s:'quant',star:true,freq:true,src:'both',r:'R4–R5',
+ name:'Safety First Ratio (Roy)',sub:"Roy's shortfall risk criterion — R5",
+ def:"Roy's Safety First criterion selects the portfolio minimizing the probability of falling below a threshold return. When the threshold equals Rf, it is mathematically equivalent to the Sharpe Ratio.",
+ formula:'SFR = (E(Rp) − R_threshold) / σp\n→ Select portfolio with HIGHEST SFR\n\nShortfall risk: P(Rp < threshold)\nIf threshold = Rf  →  SFR = Sharpe Ratio\n\nBayes Formula: P(A|B) = P(B|A) × P(A) / P(B)\n(used to update probabilities given new information)',
+ q:'MAR=5%. Portfolio A: (E=12%, σ=18%), Portfolio B: (E=10%, σ=12%). Which minimizes shortfall risk?',
+ a:'SFR_A=(12−5)/18=0.389. SFR_B=(10−5)/12=0.417. Choose B — lower probability of falling below the 5% threshold.',
+ tags:[['red','★ Exam Favorite'],['blue','R5']]},
+
+{id:'q4b',s:'quant',star:false,freq:false,src:'schweser',r:'R4',
+ name:'Expected Value & Variance (Probability)',sub:'Probability-weighted return and risk — R4',
+ def:'The expected value of a random variable is the probability-weighted average of all possible outcomes. Variance measures the dispersion of outcomes around the expected value.',
+ formula:'E(X) = Σ P(xᵢ) × xᵢ\nVar(X) = Σ P(xᵢ) × (xᵢ − E(X))²\nσ = √Var(X)\n\nConditional Expected Value: E(X|Y) = expected X given Y occurred\nTotal Probability Rule: P(A) = Σ P(A|Sᵢ)×P(Sᵢ)',
+ q:'Scenario: Boom (30%): return 20%. Normal (50%): return 10%. Recession (20%): return −5%. E(R) and σ?',
+ a:'E(R) = 0.3×20 + 0.5×10 + 0.2×(−5) = 6+5−1 = 10%. Var = 0.3(20−10)²+0.5(10−10)²+0.2(−5−10)² = 30+0+45 = 75. σ = √75 ≈ 8.66%.',
+ tags:[['blue','R4'],['orange','Probability']]},
+
+// ══ QUANT R7–R8 ══
+{id:'q7',s:'quant',star:true,freq:true,src:'both',r:'R7–R8',
+ name:'Sampling & Central Limit Theorem',sub:'Statistical inference — R7',
+ def:'The Central Limit Theorem: regardless of the population distribution shape, the sampling distribution of the sample mean approaches a normal distribution as n increases (n ≥ 30 is typically sufficient). This is what enables parametric hypothesis testing.',
+ formula:'Standard Error = σ / √n  (known σ) or  s / √n  (estimated σ)\nConfidence Interval: X̄ ± z × (σ/√n)\n\nSampling methods:\n  Simple random: every observation equally likely\n  Stratified random: population divided into strata, then random within\n  Systematic: every k-th member selected\n\nSurvivorShip bias: only includes surviving entities → overstates returns',
+ q:'Population σ=20, n=100. Construct a 95% CI for the mean if X̄=50.',
+ a:'SE = 20/√100 = 2.0. 95% CI: 50 ± 1.96×2 = [46.08, 53.92].',
+ tags:[['blue','R7']]},
+
+{id:'q8',s:'quant',star:true,freq:true,src:'both',r:'R8',
+ name:'Type I & Type II Error',sub:'Hypothesis testing errors — R8',
+ def:'Type I Error (α): rejecting H₀ when it is true — "false positive." Controlled directly by the significance level. Type II Error (β): failing to reject H₀ when it is false — "false negative." The tradeoff: lowering α raises β.',
+ formula:'α = P(Type I Error) = significance level (e.g., 5%)\nβ = P(Type II Error)\nPower = 1 − β  (probability of correctly rejecting false H₀)\n\nTwo-tailed test: H₁: μ ≠ μ₀\nOne-tailed test: H₁: μ > μ₀  or  H₁: μ < μ₀\n\np-value: smallest α at which H₀ is rejected',
+ q:'At α=5%, a test fails to detect a true effect. What type of error, and how can it be reduced?',
+ a:'Type II Error (False Negative). Reduce by: increasing sample size n, increasing α, or reducing σ (more precise measurement).',
+ tags:[['red','★ Exam Favorite'],['blue','R8']]},
+
+// ══ QUANT R9–R10 ══
+{id:'q9',s:'quant',star:true,freq:true,src:'both',r:'R9–R10',
+ name:'Spearman Rank Correlation',sub:'Non-parametric correlation — R9',
+ def:'A non-parametric correlation coefficient that uses ranks instead of raw values. Does not require normality; robust to outliers. Chi-square test (R9) tests independence between categorical variables.',
+ formula:'rs = 1 − [6·Σdᵢ²] / [n(n²−1)]\ndᵢ = difference in ranks for observation i\n\nChi-square test for independence:\nχ² = Σ [(Observed − Expected)² / Expected]\ndf = (rows−1)(cols−1)\n\nOLS regression: b₁ = Cov(X,Y)/Var(X)\nR² = [Corr(X,Y)]²  (proportion of Y variation explained by X)',
+ q:'Return data is non-normal with outliers. Which correlation measure is more appropriate: Pearson or Spearman?',
+ a:'Spearman. Rank-based → no normality assumption, and outliers affect ranks much less than raw values.',
+ tags:[['purple','Non-parametric'],['blue','R9']]},
+
+{id:'q10',s:'quant',star:true,freq:true,src:'both',r:'R10',
+ name:'OLS Regression & Standard Error',sub:'Linear regression — R10',
+ def:'Ordinary Least Squares estimates the linear relationship minimizing the sum of squared residuals. RMSE/SEE measures model fit. F-statistic tests overall model significance.',
+ formula:'Ŷ = b₀ + b₁X\nb₁ = Cov(X,Y)/Var(X)  =  ρ·(σY/σX)\nb₀ = Ȳ − b₁·X̄\nt-stat = b₁ / SE(b₁)\nRMSE = √[SSE/n]  =  Standard Error of Estimate\nR² = SSR/SST = 1 − SSE/SST',
+ q:'b₁=0.8, SE=0.3, n=30. Is the slope significant at 5% (two-tailed)?',
+ a:'t=0.8/0.3=2.67. df=28, critical t≈2.048. Since 2.67>2.048, reject H₀ → slope is statistically significant.',
+ tags:[['red','★ Exam Favorite'],['blue','R10']]},
+
+{id:'q11',s:'quant',star:false,freq:true,src:'schweser',r:'R11',
+ name:'Fintech: Big Data & Machine Learning',sub:'Quantitative applications in finance — R11',
+ def:'Big Data: massive, complex datasets from diverse sources. Machine learning: algorithms that learn patterns from data without explicit programming.',
+ formula:'Big Data characteristics (3Vs): Volume, Velocity, Variety\nData types: structured (spreadsheets), semi-structured (XML), unstructured (text, images)\n\nML types:\n  Supervised: labeled data → regression, classification\n  Unsupervised: unlabeled → clustering, dimensionality reduction\n  Deep learning: neural networks with multiple layers\n\nRisks: Overfitting (model fits noise, not signal), survivorship bias, look-ahead bias',
+ q:'An analyst trains a stock selection model on historical data and achieves 80% accuracy in-sample but only 52% out-of-sample. What problem does this indicate?',
+ a:'Overfitting — the model learned noise specific to the training data rather than generalizable patterns. Solution: cross-validation, simpler models, regularization.',
+ tags:[['blue','R11'],['purple','Fintech']]},
+
+// ══ ECONOMICS R12 ══
+{id:'e1',s:'economics',star:true,freq:true,src:'both',r:'R12',
+ name:'Market Structures',sub:'Competitive dynamics — R12',
+ def:'The four market structures differ in number of firms, product differentiation, barriers to entry, and pricing power.',
+ formula:'Perfect Competition: many firms, identical products, P=MC, zero long-run profit\nMonopolistic Competition: many firms, differentiated products, slight pricing power\nOligopoly: few firms, high interdependence, kinked demand curve\nMonopoly: one firm, price maker, MR=MC, P>MC, barriers to entry\n\nKinked Demand (Oligopoly):\n  Price increase → rivals do NOT follow (elastic demand above)\n  Price decrease → rivals DO follow (inelastic demand below)\n  Result: price rigidity, discontinuous MR\n\nHHI = Σ(market share)² → measures industry concentration',
+ q:'Firm A (40%), B (35%), C (25%) dominate an industry. HHI?',
+ a:'HHI = 40²+35²+25² = 1,600+1,225+625 = 3,450 → Highly concentrated (>2,500).',
+ tags:[['green','High-Frequency'],['blue','R12']]},
+
+// ══ ECONOMICS R13–R15 ══
+{id:'e2',s:'economics',star:true,freq:true,src:'both',r:'R13–R15',
+ name:'Business Cycles, Monetary & Fiscal Policy',sub:'Macroeconomic policy framework — R13–R15',
+ def:'Business cycles describe recurring expansions and contractions in economic activity. Monetary and fiscal policies are the two main government tools for stabilization.',
+ formula:'Business Cycle Phases: Expansion → Peak → Contraction → Trough\n\nLeading indicators: stock prices, building permits, money supply (precede economy)\nCoincident: GDP, employment (move with economy)\nLagging: unemployment rate, bank prime rate (follow economy)\n\nMonetary Policy tools (Central Bank):\n  Open market operations, reserve requirements, discount rate\n  Expansionary: ↓ rates → ↑ investment → ↑ AD\n  Contractionary: ↑ rates → ↓ investment → ↓ inflation\n\nFiscal Policy (Government):\n  Expansionary: ↑ spending or ↓ taxes\n  Contractionary: ↓ spending or ↑ taxes',
+ q:'Central bank raises benchmark rate. Trace the effect through the economy.',
+ a:'↑ rates → ↑ borrowing costs → ↓ consumption & investment → ↓ aggregate demand → ↓ inflation. Short-run: ↑ unemployment. Long-run: price level falls toward target.',
+ tags:[['red','★ Exam Favorite'],['blue','R13–R15']]},
+
+{id:'e2b',s:'economics',star:false,freq:true,src:'schweser',r:'R15',
+ name:'Central Bank Objectives & Tools',sub:'Monetary policy implementation — R15',
+ def:'Effective central banks exhibit three key qualities: independence (free from political pressure), credibility (commitment to stated objectives), and transparency (clear communication of policy).',
+ formula:'Primary objective: price stability (target inflation, usually 2%)\nSecondary: full employment, economic growth, financial stability\n\nPolicy tools:\n  Open market operations: buy/sell government securities\n  Discount rate: rate charged to banks for borrowing from CB\n  Reserve requirements: minimum reserves banks must hold\n  Forward guidance: communication about future policy direction\n\nQuantitative Easing: purchasing long-term assets when short rates near zero',
+ q:'A central bank announces it will keep rates near zero "for at least 3 years." What policy tool is this?',
+ a:'Forward guidance — managing expectations about future monetary policy without changing the current rate. Aims to lower long-term rates by anchoring expectations.',
+ tags:[['blue','R15'],['orange','Central Bank']]},
+
+// ══ ECONOMICS R16–R19 ══
+{id:'e3',s:'economics',star:true,freq:true,src:'both',r:'R16–R19',
+ name:'International Trade, Geopolitics & FX',sub:'Global economics — R16–R19',
+ def:'Countries trade to exploit comparative advantage. Exchange rates link domestic and international prices.',
+ formula:'Comparative Advantage: produce where opportunity cost is lower\nAbsolute Advantage: produce more output with same inputs\n\nTrade Restrictions: Tariffs (tax) → ↑ domestic producer surplus, ↓ consumer surplus\nQuotas, voluntary export restraints, subsidies\n\nExchange Rate Conventions:\nUSD/EUR = 1.10 → price currency = USD, base currency = EUR\nAppreciation of base = exchange rate ↑\nDepreciation of base = exchange rate ↓\n\nInterest Rate Parity (Covered): F = S × (1+r_d)/(1+r_f)\nPPP (Relative): %ΔS ≈ π_d − π_f\nForward Premium = F − S > 0 (base trades at forward premium)',
+ q:'USD/EUR spot=1.10. US interest rate=5%, Euro rate=2%. 1-year forward rate?',
+ a:'F = 1.10 × (1.05/1.02) = 1.10 × 1.0294 ≈ 1.1324. EUR trades at forward premium (F > S) since Euro rates are lower.',
+ tags:[['red','★ Exam Favorite'],['blue','R18–R19']]},
+
+{id:'e4',s:'economics',star:true,freq:false,src:'both',r:'R16',
+ name:'Geopolitics & Globalization',sub:'Geopolitical risk framework — R16',
+ def:'Geopolitics refers to the study of how geography and international relations affect political power and economic outcomes. Globalization vs. nationalism represents the key spectrum.',
+ formula:'4 Geopolitical Categories:\n  Autarky: non-cooperation + nationalism (closed economy)\n  Hegemony: non-cooperation + globalization (single dominant power)\n  Bilateralism: cooperation + nationalism (two-country deals)\n  Multilateralism: cooperation + globalization (WTO, IMF)\n\nGeopolitical Risk Types:\n  Event risk: timing known (elections, summits)\n  Exogenous risk: unanticipated (terrorist attacks, natural disasters)\n  Thematic risk: long-term structural shifts (deglobalization trend)',
+ q:'A government imposes broad tariffs on imports and withdraws from multilateral trade agreements. What geopolitical category does this represent?',
+ a:'Autarky (or shift toward nationalism): non-cooperative, inward-looking economic policy.',
+ tags:[['blue','R16'],['purple','Geopolitics']]},
+
+{id:'e5',s:'economics',star:true,freq:true,src:'both',r:'R19',
+ name:'Forward Exchange Rates & Currency Cross Rates',sub:'FX pricing — R19',
+ def:'Forward exchange rates reflect the no-arbitrage condition between spot rates and interest rate differentials. Cross rates are exchange rates between two currencies calculated via a third.',
+ formula:'No-Arbitrage Forward Rate:\nF(d/f) = S(d/f) × (1+r_d)/(1+r_f)\n\nForward Premium/Discount (base currency):\n(F−S)/S × (360/days) × 100\n\nCross Rate:\nIf MXN/USD=12.1 and USD/EUR=1.42\nThen MXN/EUR = 12.1 × 1.42 = 17.18\n\nForward ≠ predictor of future spot rates\n(Forward = no-arbitrage rate at one point in time)',
+ q:'GBP/USD=1.25, UK rate=4%, US rate=2%. Calculate the 1-year no-arbitrage forward rate.',
+ a:'F = 1.25 × (1.02/1.04) = 1.25 × 0.9808 ≈ 1.2260. GBP at forward discount (F<S) because UK rates are higher.',
+ tags:[['red','★ Exam Favorite'],['blue','R19']]},
+
+// ══ CORPORATE FINANCE R20–R26 ══
+{id:'c1',s:'corp',star:false,freq:true,src:'schweser',r:'R20–R22',
+ name:'Corporate Governance & ESG',sub:'Stakeholders, agency, and governance — R20–R22',
+ def:'Corporate governance: internal controls and procedures that define rights and responsibilities of stakeholders, and resolve conflicts of interest. ESG factors are increasingly integrated into investment analysis.',
+ formula:'Principal-Agent Conflict: management (agent) vs. shareholders (principal)\nSolutions: performance-linked pay, independent board, activist shareholders\n\nBoard Duties: hire/evaluate management, set strategy, approve major capital decisions,\n  ensure quality of financial reporting, oversee risk management\n\nESG Factors:\n  E: climate change, pollution, energy efficiency, water use\n  S: privacy, labor relations, diversity, community\n  G: board composition, executive pay, bribery, lobbying\n\nStaggered board: directors replaced in cycles → harder to change control\nPoison pill: shareholder rights plan → dilutes hostile acquirer',
+ q:'Minority shareholders prefer independent directors over management-affiliated directors. Why?',
+ a:'Independent directors act in shareholder (not management) interests: stronger oversight of executive compensation, strategic decisions, and financial reporting quality.',
+ tags:[['green','High-Frequency'],['blue','R20–R22']]},
+
+{id:'c2',s:'corp',star:true,freq:true,src:'both',r:'R23–R24',
+ name:'Working Capital & Capital Budgeting',sub:'Liquidity management and investment decisions — R23–R24',
+ def:'Working capital management ensures sufficient liquidity. Capital budgeting selects investments that maximize firm value.',
+ formula:'CCC = DSO + DOH − DPO\n  DSO = 365 / AR Turnover\n  DOH = 365 / Inventory Turnover\n  DPO = 365 / AP Turnover\n\nLiquidity Ratios:\n  Current = CA / CL\n  Quick = (Cash + Mkt Sec + AR) / CL\n  Cash = (Cash + Mkt Sec) / CL\n\nCapital Budgeting Rules:\n  NPV > 0 → Accept\n  IRR > WACC → Accept\n  Payback Period: ignores TVM and post-payback cash flows\n  Discounted Payback: uses discounted cash flows\n  Mutually exclusive: NPV > IRR rule (NPV gives correct ranking)',
+ q:'DSO=45, DOH=30, DPO=20. CCC? What happens if DPO increases to 30?',
+ a:'CCC = 45+30−20 = 55 days. If DPO rises to 30: CCC = 45+30−30 = 45 days — company converts cash 10 days faster.',
+ tags:[['red','★ Exam Favorite'],['blue','R23–R24']]},
+
+{id:'c3',s:'corp',star:true,freq:true,src:'both',r:'R24–R25',
+ name:'WACC & Cost of Capital',sub:'Weighted average cost of capital — R24–R25',
+ def:'WACC is the minimum return a firm must earn on its assets to satisfy all providers of capital. Used as the discount rate in capital budgeting.',
+ formula:'WACC = Wd·Kd(1−t) + Wp·Kp + We·Ke\n\nKe (CAPM) = Rf + β·(Rm−Rf)\nKd (after-tax) = YTM × (1−t)\nKp (preferred) = Dp / P₀\n\n※ Use MARKET value weights, not book value\n※ Marginal cost of new capital (not historical cost)\n※ Interest tax shield only applies to Kd',
+ q:'Debt 40% (YTM=6%), Equity 60% (β=1.2), Rf=3%, ERP=6%, t=25%. WACC?',
+ a:'Ke = 3+1.2×6 = 10.2%. Kd(AT)=6%×0.75=4.5%. WACC = 0.4×4.5+0.6×10.2 = 1.8+6.12 = 7.92%.',
+ tags:[['red','★ Exam Favorite'],['blue','R25']]},
+
+{id:'c4',s:'corp',star:true,freq:true,src:'both',r:'R25',
+ name:'MM Proposition & Capital Structure',sub:'Capital structure theory — R25',
+ def:'Modigliani-Miller theorems: in perfect markets, capital structure is irrelevant. With taxes, debt has value due to the interest tax shield. Trade-off theory balances tax benefits against financial distress costs.',
+ formula:'MM I (no taxes): VL = Vu  (capital structure irrelevant)\nMM I (with taxes): VL = Vu + t·D\n  (interest tax shield = t × D)\n\nMM II (no taxes): Ke = K₀ + (K₀−Kd)·(D/E)\n  (Ke rises with leverage, but WACC unchanged)\n\nStatic Trade-off Theory:\n  Optimal leverage: PV(tax shield) = PV(financial distress costs)\n\nPecking Order Theory:\n  Preference: retained earnings → debt → equity (last resort)',
+ q:'Unlevered firm value=$1,000, debt=$400, t=25%. What is the levered firm value?',
+ a:'VL = 1,000 + 0.25×400 = $1,100. The $100 gain is the PV of the interest tax shield.',
+ tags:[['blue','R25'],['orange','Capital Structure']]},
+
+{id:'c5',s:'corp',star:true,freq:true,src:'both',r:'R25–R26',
+ name:'Dividends, FCFF & FCFE',sub:'Cash flow to capital providers — R25–R26',
+ def:'Free cash flow measures the cash available to capital providers after operating needs and capital expenditures.',
+ formula:'FCFF = NI + Interest×(1−t) − CAPEX − ΔWC\n     = CFO + Interest×(1−t) − CAPEX\n\nFCFE = NI − CAPEX + Depreciation − ΔWC + Net Borrowing\n     = CFO − CAPEX + Net Borrowing\n\nDividend Policy:\n  Payout Ratio = DPS / EPS\n  Retention Ratio = 1 − Payout\n  SGR = ROE × Retention Rate\n\nPriority of Claims:\n  Senior Debt → Junior Debt → Preferred Stock → Common Stock',
+ q:'ROE=15%, payout=40%. SGR? If a firm has CFO=$200, CAPEX=$80, net borrowing=$30: FCFE?',
+ a:'SGR = 15%×0.6 = 9%. FCFE = 200−80+30 = $150.',
+ tags:[['red','★ Exam Favorite'],['blue','R26']]},
+
+{id:'c6',s:'corp',star:false,freq:true,src:'schweser',r:'R25',
+ name:'Leverage: Operating & Financial',sub:'Business and financial risk — R25',
+ def:'Operating leverage measures the sensitivity of operating income to changes in sales. Financial leverage measures the sensitivity of EPS to changes in EBIT.',
+ formula:'DOL (Degree of Operating Leverage) = %ΔEBIT / %ΔSales\n  = (Sales − Variable Costs) / EBIT\n  = Contribution Margin / EBIT\n\nDFL (Degree of Financial Leverage) = %ΔEPS / %ΔEBIT\n  = EBIT / (EBIT − Interest)\n\nDTL (Total Leverage) = DOL × DFL\n  = %ΔEPS / %ΔSales\n\nHigher fixed costs → higher DOL → more cyclical earnings',
+ q:'Sales=$1,000, Variable costs=$600, Fixed costs=$200, EBIT=$200, Interest=$50. DOL and DFL?',
+ a:'Contribution margin = 1000−600 = $400. DOL = 400/200 = 2.0. DFL = 200/(200−50) = 1.33. DTL = 2.0×1.33 = 2.67.',
+ tags:[['green','High-Frequency'],['orange','Leverage']]},
+
+// ══ FRA R27–R38 ══
+{id:'f1',s:'fra',star:false,freq:true,src:'schweser',r:'R27',
+ name:'Financial Statement Framework',sub:'Analysis process and standards — R27',
+ def:'Financial reporting provides information about a company\'s performance. Analysis uses this information to make economic decisions.',
+ formula:'6-Step Analysis Process:\n  1. State objective\n  2. Gather data\n  3. Process data\n  4. Analyze and interpret\n  5. Report conclusions\n  6. Update analysis\n\nStandard-setting bodies:\n  IASB → IFRS (principles-based, used globally)\n  FASB → US GAAP (rules-based)\n  SEC enforces in USA | FCA enforces in UK\n  IOSCO: international organization of securities regulators',
+ q:'What is the difference between financial reporting and financial statement analysis?',
+ a:'Financial reporting: companies communicate performance via financial statements. Financial statement analysis: analysts use those statements to make investment/credit decisions. Reporting = preparation; Analysis = interpretation.',
+ tags:[['blue','R27']]},
+
+{id:'f2',s:'fra',star:true,freq:true,src:'both',r:'R28',
+ name:'Revenue & Expense Recognition',sub:'Income statement — R28',
+ def:'Revenue is recognized when performance obligations are satisfied. Expenses are matched to the revenue they help generate (matching principle).',
+ formula:'5-Step Revenue Recognition (IFRS 15 / ASC 606):\n  1. Identify contract\n  2. Identify performance obligations\n  3. Determine transaction price\n  4. Allocate price to obligations\n  5. Recognize revenue as each obligation is satisfied\n\nCapitalization vs. Expensing:\n  Capitalize → lower initial expense, higher assets, higher initial NI\n  Expense → higher initial expense, lower assets, lower initial NI\n  Both methods produce same total expense over asset life\n\nMatching Principle: COGS matched to revenue in period of sale',
+ q:'Software company signs a $12,000 annual service contract. How much revenue is recognized in Q1?',
+ a:'$3,000 (= $12,000/4 quarters). Service obligation is satisfied continuously → recognize proportionally as time passes.',
+ tags:[['red','★ Exam Favorite'],['blue','R28']]},
+
+{id:'f3',s:'fra',star:true,freq:true,src:'both',r:'R28',
+ name:'Earnings Per Share (EPS)',sub:'Basic and diluted EPS — R28',
+ def:'EPS measures earnings available per share of common stock. Diluted EPS assumes all dilutive securities are converted.',
+ formula:'Basic EPS = (NI − Preferred Dividends) / Weighted Avg Shares\n\nDiluted EPS = (NI − Pref.Div + Interest×(1−t)) / (Shares + Potential Shares)\n\nAntidilutive: if including the security raises EPS → EXCLUDE from diluted EPS\n(Diluted EPS ≤ Basic EPS always)\n\nTreasury Stock Method (options/warrants):\n  Net new shares = shares issued − shares repurchased with proceeds',
+ q:'NI=$1,000, pref dividends=$100, shares=300, convertible bond adds 50 shares + saves $50 after-tax interest. Basic and Diluted EPS?',
+ a:'Basic = (1000−100)/300 = $3.00. Diluted = (1000−100+50)/(300+50) = 950/350 = $2.71. Diluted < Basic → dilutive (include).',
+ tags:[['red','★ Exam Favorite'],['blue','R28']]},
+
+{id:'f4',s:'fra',star:false,freq:true,src:'schweser',r:'R29',
+ name:'Balance Sheet: Intangibles & Securities',sub:'Asset classification and measurement — R29',
+ def:'Intangible assets, goodwill, and marketable securities require specific accounting treatment under IFRS and GAAP.',
+ formula:'Intangibles:\n  Internally developed: EXPENSED (both IFRS and GAAP)\n  Purchased finite-lived: amortized over useful life\n  Purchased indefinite-lived: NOT amortized, tested for impairment annually\n  R&D: IFRS → research=expense, development=capitalize if criteria met\n       GAAP → both expensed (except software dev)\n\nGoodwill = Purchase Price − Fair Value of Net Identifiable Assets\n  Not amortized; tested for impairment annually\n\nMarketable Securities (IFRS):\n  FVTPL: fair value through P&L (trading)\n  FVOCI: fair value through OCI (AFS equivalent)\n  Amortized Cost: held to maturity',
+ q:'Firm A develops a trademark internally at a cost of $500K. How is this recorded?',
+ a:'Expensed — internally developed intangibles cannot be capitalized under either IFRS or GAAP. Only purchased intangibles are recorded as assets.',
+ tags:[['green','High-Frequency'],['blue','R29']]},
+
+{id:'f5',s:'fra',star:true,freq:true,src:'both',r:'R30–R31',
+ name:'Cash Flow Statement (CFO, CFI, CFF)',sub:'Statement of cash flows — R30–R31',
+ def:'The cash flow statement reconciles net income to actual cash generated. CFO is the most important indicator of financial health.',
+ formula:'CFO (Indirect Method) = NI\n  + Non-cash expenses (Depreciation, Amortization)\n  − Gain on asset sale / + Loss on asset sale\n  − Increase in operating assets (AR, Inventory)\n  + Increase in operating liabilities (AP, Accrued Expenses)\n\nCFI: changes in noncurrent assets\n  Buy PP&E → cash outflow | Sell assets → cash inflow\n\nCFF: changes in noncurrent liabilities and equity\n  Issue debt/equity → inflow | Repay debt, pay dividends → outflow\n\nFCFF = CFO + Interest×(1−t) − CAPEX\nFCFE = CFO − CAPEX + Net Borrowing',
+ q:'NI=$500, Depreciation=$100, AR increases $50, AP increases $30, sold equipment at $20 gain. CFO?',
+ a:'CFO = 500 + 100 − 50 + 30 − 20 = $560. (Gain on asset sale is removed from CFO → appears in CFI.)',
+ tags:[['red','★ Exam Favorite'],['blue','R30–R31']]},
+
+{id:'f6',s:'fra',star:true,freq:true,src:'both',r:'R32',
+ name:'Inventory: FIFO, LIFO, & Average Cost',sub:'Inventory accounting methods — R32',
+ def:'The inventory cost flow assumption affects COGS, ending inventory, and profitability. LIFO is prohibited under IFRS.',
+ formula:'Rising Prices (inflation):\n  FIFO: lower COGS, higher inventory, higher NI, higher taxes\n  LIFO: higher COGS, lower inventory, lower NI, lower taxes\n  Avg Cost: between FIFO and LIFO\n\nLIFO Reserve = FIFO Inventory − LIFO Inventory\nIFRS to GAAP adjustment: FIFO inventory = LIFO inventory + LIFO reserve\n\nInventory write-down:\n  IFRS: to NRV (net realizable value); reversal allowed\n  GAAP: to lower of cost or NRV; no reversal allowed\n\nLIFO Liquidation: inventory levels fall → old low-cost LIFO layers sold\n  → abnormally high profit margin (temporary)',
+ q:'A LIFO firm has LIFO reserve=$200, LIFO inventory=$800. What would inventory be under FIFO?',
+ a:'FIFO inventory = 800 + 200 = $1,000. The LIFO reserve represents accumulated COGS difference between FIFO and LIFO.',
+ tags:[['red','★ Exam Favorite'],['blue','R32']]},
+
+{id:'f7',s:'fra',star:true,freq:true,src:'both',r:'R33',
+ name:'Long-Lived Assets: Depreciation & Impairment',sub:'Non-current asset accounting — R33',
+ def:'Long-lived assets are depreciated over their useful lives. Impairment occurs when carrying value exceeds recoverable amount.',
+ formula:'Depreciation Methods:\n  Straight-line: (Cost − Salvage) / Useful Life\n  DDB (Double Declining Balance): 2/N × Carrying Value  (accelerated)\n  Units of Production: (Cost−Salvage)/Total Units × Units Produced\n\nCapitalization vs. Expensing effects:\n  Capitalize: higher NI initially, higher assets/equity, lower CFI, higher CFO\n  Expense: lower NI initially, lower assets\n\nImpairment:\n  IFRS: Recoverable = max(Fair Value−Selling Costs, Value in Use)\n  GAAP: 2-step — compare undiscounted CF first, then fair value\n  Write-down → ↓ NI, ↓ Assets, ↑ Debt ratios, lower future depreciation',
+ q:'Asset cost=$10,000, salvage=$0, useful life=5 years. Year 1 depreciation under SL and DDB?',
+ a:'SL: 10,000/5 = $2,000. DDB: 2/5 × 10,000 = $4,000. DDB accelerates expense recognition → lower NI in early years.',
+ tags:[['red','★ Exam Favorite'],['blue','R33']]},
+
+{id:'f8',s:'fra',star:true,freq:true,src:'both',r:'R34',
+ name:'Lease Accounting (IFRS 16 / ASC 842)',sub:'Lessee reporting — R34',
+ def:'IFRS 16 requires most leases to be capitalized. Lessees record a right-of-use (ROU) asset and lease liability. Affects key financial ratios.',
+ formula:'Lessee: ROU Asset & Lease Liability = PV of future lease payments\nFinance Lease (both IFRS/GAAP): Depreciation + Interest expense\nOperating Lease (GAAP only): straight-line lease expense\n\nRatio impact of capitalizing a lease:\n  Assets ↑, Liabilities ↑ → Debt/Equity ↑\n  Early years: higher total expense (interest+dep > straight-line)\n  EBITDA ↑ (lease cost reclassified as D&A + interest)\n  CFO ↑ (principal repayment moved to CFF)\n  Interest coverage ↓\n\nShort-term leases (<12 months): exempted, recognized as expense',
+ q:'A firm converts an operating lease to a finance lease under IFRS 16. What happens to debt-to-equity ratio?',
+ a:'Debt/Equity rises — both the ROU asset and lease liability are added to the balance sheet, but the liability increases the numerator of D/E more prominently.',
+ tags:[['green','High-Frequency'],['blue','R34']]},
+
+{id:'f9',s:'fra',star:true,freq:true,src:'both',r:'R35',
+ name:'Deferred Tax Assets & Liabilities',sub:'Income tax accounting — R35',
+ def:'Temporary differences between accounting profit and taxable income create deferred tax assets (DTAs) or liabilities (DTLs) that reverse in future periods.',
+ formula:'DTL: Accounting income > Taxable income in current period\n  → Pay less tax now, more later (liability)\n  Common cause: accelerated tax depreciation\n\nDTA: Accounting income < Taxable income in current period\n  → Pay more tax now, less later (asset)\n  Common cause: warranty expense (deducted for tax when paid)\n\nDTL or DTA = Temporary Difference × Tax Rate\n\nValuation Allowance (GAAP): reduces DTA if future realization is unlikely\n\nPermanent Differences: DO NOT create DTAs or DTLs\n  (e.g., tax-exempt interest, non-deductible penalties)',
+ q:'Accounting depreciation=$100, tax depreciation=$150. Tax rate=30%. DTL or DTA? Amount?',
+ a:'Tax dep > Accounting dep → taxable income < accounting income → DTL. DTL = (150−100)×30% = $15.',
+ tags:[['red','★ Exam Favorite'],['blue','R35']]},
+
+{id:'f10',s:'fra',star:true,freq:false,src:'both',r:'R36',
+ name:'Financial Reporting Quality',sub:'Earnings quality and warning signs — R36',
+ def:'High-quality financial reporting is decision-useful, relevant, and faithfully represents economic reality. Low-quality reporting can be aggressive (biased) or outright fraudulent.',
+ formula:'Quality Spectrum (high to low):\n  GAAP + decision useful → GAAP, aggressive choices → GAAP, non-compliant\n  → Fraudulent reporting\n\nWarning Signs of Low Quality:\n  Revenue: channel stuffing, bill-and-hold, premature recognition\n  Expenses: excessive capitalization, understated reserves\n  Balance sheet: overstated assets, hidden liabilities\n  Cash flow: reclassifying operating outflows to investing\n\nEarnings Quality: sustainable > transitory earnings\n  NI >> CFO → potential manipulation (accruals high)',
+ q:'A company\'s net income grows 20% YoY, but operating cash flow declines 10%. What does this suggest?',
+ a:'Declining earnings quality — growing gap between NI and CFO suggests aggressive accrual accounting. Accruals are increasing, which may not be sustainable.',
+ tags:[['orange','Earnings Quality'],['blue','R36']]},
+
+{id:'f11',s:'fra',star:false,freq:true,src:'schweser',r:'R37',
+ name:'Financial Ratio Analysis & DuPont',sub:'Ratio analysis — R37',
+ def:'Financial ratios provide standardized comparisons across firms and time periods. The DuPont framework decomposes ROE into its drivers.',
+ formula:'Activity: Asset Turnover = Revenue/Assets\n  AR Turnover = Revenue/AR | Inventory Turnover = COGS/Inv\n\nLiquidity: Current = CA/CL | Quick = (Cash+AR)/CL\n\nSolvency: Debt/Equity | Interest Coverage = EBIT/Interest\n\nProfitability: Net Margin = NI/Rev | ROA = NI/Assets | ROE = NI/Equity\n\n3-Factor DuPont:\n  ROE = Net Margin × Asset Turnover × Equity Multiplier\n      = (NI/Rev) × (Rev/Assets) × (Assets/Equity)\n\n5-Factor DuPont:\n  ROE = Tax Burden × Interest Burden × EBIT Margin × Asset Turnover × Leverage',
+ q:'Two firms have same ROE of 15%. Firm A has high margins/low turnover, Firm B has low margins/high turnover. What does DuPont tell you?',
+ a:'Firm A: premium/niche strategy (high margin, low volume). Firm B: high-volume/low-margin strategy. Same ROE from different business models. Leverage component must also be compared.',
+ tags:[['red','★ Exam Favorite'],['blue','R37']]},
+
+{id:'f12',s:'fra',star:true,freq:true,src:'both',r:'R32–R33',
+ name:'IFRS vs. GAAP Key Differences',sub:'Standards comparison — R32–R35',
+ def:'Understanding IFRS vs. GAAP differences is critical for comparing companies across jurisdictions.',
+ formula:'Inventory:\n  IFRS: LIFO PROHIBITED / GAAP: LIFO permitted\n  IFRS: write-down reversals allowed / GAAP: no reversal\n\nIntangibles:\n  IFRS: development costs capitalized if criteria met\n  GAAP: R&D both expensed (except software)\n  IFRS: revaluation of intangibles allowed / GAAP: not allowed\n\nInvestment Property:\n  IFRS: Fair Value Model OR Cost Model\n  GAAP: Cost Model only\n\nCash Flow Classification:\n  IFRS: interest paid can be CFO or CFF | interest received: CFO or CFI\n  GAAP: interest paid/received = CFO (fixed)',
+ q:'Inflation is rising. A LIFO firm (GAAP) and FIFO firm (IFRS) have same operations. How does net income compare?',
+ a:'LIFO firm has higher COGS (recent, expensive inventory sold first) → lower NI → lower taxes. FIFO firm has lower COGS → higher NI. LIFO provides tax deferral benefit in inflation.',
+ tags:[['red','★ Exam Favorite'],['blue','R32–R35']]},
+
+// ══ EQUITY R39–R46 ══
+{id:'eq1',s:'equity',star:false,freq:true,src:'schweser',r:'R39',
+ name:'Market Structure & Order Types',sub:'Market microstructure — R39',
+ def:'Financial markets facilitate the exchange of securities. Order types control how and when trades are executed.',
+ formula:'Market Orders: execute immediately at best available price\nLimit Orders: execute only at specified price or better\nStop Orders: triggered when price hits stop level (then market order)\nStop-Limit: triggered at stop level, then limit order\n\nLong Position: buy stock → profit from price increase\nShort Position: borrow and sell → profit from price decrease\n  Short sale mechanics: borrow → sell → buy back → return\n  Margin Call: when equity falls below maintenance margin\n\nMarket Types:\n  Quote-driven (dealer): market makers post bid/ask\n  Order-driven: buyers/sellers interact directly\n  Brokered: brokers match buyers and sellers',
+ q:'Investor places a limit buy order at $50 when stock is trading at $55. When does it execute?',
+ a:'When the price falls to $50 or below. If the price never reaches $50, the order never executes.',
+ tags:[['blue','R39'],['green','High-Frequency']]},
+
+{id:'eq2',s:'equity',star:false,freq:true,src:'schweser',r:'R40–R41',
+ name:'Market Indexes & EMH',sub:'Index construction and market efficiency — R40–R41',
+ def:'Market indexes measure performance of a specified group of securities. EMH describes how quickly prices incorporate information.',
+ formula:'Index Weighting:\n  Price-weighted (e.g., DJIA): higher-priced stocks dominate\n  Market-cap weighted (e.g., S&P 500): larger companies dominate\n  Equal-weighted: all stocks equal weight\n\nEMH Forms:\n  Weak: past prices already reflected → technical analysis fails\n  Semi-strong: all public info reflected → fundamental analysis fails\n  Strong: all info (incl. insider) reflected → nobody consistently outperforms\n\nAnomalies suggesting market inefficiency:\n  Size effect, value effect, January effect, momentum',
+ q:'If markets are semi-strong efficient, which analysis can consistently generate alpha?',
+ a:'Neither technical nor fundamental analysis. All public information is already priced in. Only private/insider information could generate alpha, which would violate strong-form efficiency.',
+ tags:[['red','★ Exam Favorite'],['blue','R40–R41']]},
+
+{id:'eq3',s:'equity',star:true,freq:true,src:'both',r:'R42–R43',
+ name:'Equity Valuation: DDM & Gordon Growth',sub:'Equity intrinsic value — R42–R43',
+ def:'The Gordon Growth Model (constant growth DDM) values a stock as the PV of dividends growing at a constant rate. Multi-stage models handle changing growth.',
+ formula:'Gordon Growth Model (single stage):\n  V₀ = D₁/(r−g) = D₀×(1+g)/(r−g)   [requires r > g]\n\ng = ROE × b   (b = retention rate = 1 − payout ratio)\n\nJustified P/E = (1−b)/(r−g)  [from Gordon model]\nJustified P/B = (ROE−g)/(r−g)\n\n2-Stage DDM:\n  PV = Σ[Dₜ/(1+r)^t] + [Vₙ/(1+r)^n]\n  where Vₙ = Dₙ₊₁/(r−g_long)\n\nFree Cash Flow to Equity (FCFE) model:\n  V₀ = FCFE₁/(r−g)',
+ q:'D₀=$2, g=5%, r=10%. Intrinsic value? Justified P/E if payout=60%?',
+ a:'V₀ = 2×1.05/(0.10−0.05) = 2.10/0.05 = $42. Justified P/E = 0.60/(0.10−0.05) = 12.0×.',
+ tags:[['red','★ Exam Favorite'],['blue','R42–R43']]},
+
+{id:'eq4',s:'equity',star:true,freq:true,src:'both',r:'R44',
+ name:'CAPM, Beta & SML',sub:'Asset pricing model — R44',
+ def:'The Capital Asset Pricing Model (CAPM) describes the required return on any risky asset as a function of its systematic risk (beta). The Security Market Line (SML) graphs this relationship.',
+ formula:'E(Ri) = Rf + βi × [E(Rm) − Rf]\nβ = Cov(Ri,Rm)/Var(Rm) = ρ(i,m) × (σi/σm)\n\nSML: return vs. beta (systematic risk)\nCML: return vs. σ (total risk) — for efficient portfolios only\n\nMispricing vs. SML:\n  Above SML → undervalued (buy)\n  Below SML → overvalued (sell)\n\nJensen\'s Alpha = Rp − [Rf + β(Rm−Rf)]\n  α>0: outperformance | α<0: underperformance\n\nTotal Risk = Systematic + Non-systematic\nDiversification eliminates non-systematic risk',
+ q:'Rf=3%, ERP=6%, β=1.5. Required return? If actual return=14%, is stock over or undervalued?',
+ a:'Required = 3+1.5×6 = 12%. Actual 14% > required 12% → Alpha = +2% → Stock is undervalued (above SML) → Buy.',
+ tags:[['red','★ Exam Favorite'],['blue','R44']]},
+
+{id:'eq5',s:'equity',star:true,freq:true,src:'both',r:'R45',
+ name:'Valuation Multiples: P/E, P/B, EV/EBITDA',sub:'Relative valuation — R45',
+ def:'Price multiples compare a stock\'s price to a value driver. They are used for relative valuation (comparing companies).',
+ formula:'P/E = Price / EPS\n  Forward P/E = Price / Next-year EPS\n  Trailing P/E = Price / Last-year EPS\n\nP/B = Price / Book Value per Share\n  P/B<1: trading below liquidation value\n\nP/S = Price / Revenue per Share (useful for negative-EPS firms)\n\nEV/EBITDA: enterprise value multiple (capital structure neutral)\n  EV = Mkt Cap + Debt − Cash\n\nPEG Ratio = P/E / Earnings Growth Rate\n  PEG < 1 → potentially undervalued relative to growth',
+ q:'Company P/E=15×, industry P/E=20×. Is the company over or undervalued?',
+ a:'Appears undervalued relative to peers (lower P/E = cheaper per dollar of earnings). However, must check if lower P/E reflects lower growth, higher risk, or lower quality earnings.',
+ tags:[['green','High-Frequency'],['blue','R45']]},
+
+{id:'eq6',s:'equity',star:true,freq:true,src:'both',r:'R46',
+ name:'ESG Investing & Industry Analysis',sub:'ESG integration and Porter\'s Five Forces — R46',
+ def:'ESG factors integrate environmental, social, and governance considerations into investment analysis. Porter\'s Five Forces analyzes industry competitive dynamics.',
+ formula:"ESG Strategies:\n  Negative screening: exclude sectors\n  Positive/Best-in-class: select ESG leaders\n  ESG Integration: factor into analysis\n  Impact investing: target measurable outcomes\n  Thematic: focused on ESG themes\n\nPorter's 5 Forces:\n  ① New entrant threat ② Substitute threat\n  ③ Buyer power ④ Supplier power\n  ⑤ Rivalry intensity\n  → All forces weak = high industry profitability",
+ q:'Patents, strong brand, and economies of scale in an industry reduce which Porter force?',
+ a:'Threat of new entrants — they create high barriers to entry, protecting existing firms from competition.',
+ tags:[['green','High-Frequency'],['blue','R46']]},
+
+{id:'eq7',s:'equity',star:true,freq:true,src:'both',r:'R44–R46',
+ name:'Behavioral Finance Biases',sub:'Cognitive and emotional biases — R87',
+ def:'Investors systematically deviate from rationality due to cognitive errors (processing limitations) and emotional biases (feelings overriding analysis).',
+ formula:'Cognitive Errors — Belief Perseverance:\n  Conservatism: slow to update views with new info\n  Confirmation bias: seek info that supports existing views\n  Representativeness: over-generalize from small samples\n  Hindsight bias: past events seem predictable in retrospect\n\nCognitive Errors — Information Processing:\n  Anchoring: over-weight initial information\n  Mental accounting: treat money differently based on source\n  Framing: decisions change based on how options are presented\n\nEmotional Biases:\n  Loss aversion: losses feel ~2× worse than equivalent gains\n  Overconfidence: overestimate own analytical ability\n  Status quo bias: prefer current state\n  Endowment bias: overvalue things currently owned\n  Regret aversion: avoid actions that might lead to regret',
+ q:'An investor holds a losing stock at $70 (bought at $100) because "it will come back." What biases apply?',
+ a:'Loss aversion (reluctant to realize loss), Anchoring (fixated on $100 purchase price), Status quo bias (prefer inaction), and possibly Regret aversion (fears regret of selling before a recovery).',
+ tags:[['red','★ Exam Favorite'],['blue','R87']]},
+
+// ══ FIXED INCOME R47–R62 ══
+{id:'fi1',s:'fi',star:false,freq:true,src:'schweser',r:'R47–R48',
+ name:'Bond Features & Embedded Options',sub:'Fixed income instrument characteristics — R47–R48',
+ def:'Bonds are characterized by their issuer, maturity, par value, coupon structure, seniority, and any embedded options.',
+ formula:'Basic Features:\n  Par (face) value: principal repaid at maturity\n  Coupon rate: % of par paid as interest\n  Zero-coupon: no coupon, pure discount security\n\nCoupon Structures:\n  Bullet: periodic coupons + lump-sum principal at maturity\n  Amortizing: principal repaid gradually\n  Step-up: coupon rate increases over time\n  Floating rate note (FRN): Coupon = MRR + quoted margin\n  PIK (payment-in-kind): interest paid in additional bonds\n\nEmbedded Options:\n  Callable: issuer can redeem early (benefits issuer)\n  Putable: investor can sell back early (benefits investor)\n  Convertible: investor can convert to equity (benefits investor)\n\nSeniority: Senior secured > Senior unsecured > Subordinated',
+ q:'Why does a callable bond offer a higher yield than an otherwise identical non-callable bond?',
+ a:'The call option benefits the issuer at the investor\'s expense — issuer calls when rates fall (just when investor wants to keep the high-yield bond). Higher yield compensates investor for this reinvestment risk.',
+ tags:[['red','★ Exam Favorite'],['blue','R47–R48']]},
+
+{id:'fi2',s:'fi',star:false,freq:true,src:'schweser',r:'R49–R51',
+ name:'Fixed Income Markets & Repo Agreements',sub:'Bond market structure — R49–R51',
+ def:'Bond markets are organized by issuer type, credit quality, and maturity. Repurchase agreements (repos) are a key source of short-term financing.',
+ formula:'Market Classification:\n  Investment grade: Baa3/BBB− and above\n  High yield (junk): Ba1/BB+ and below\n  Money market: original maturity ≤ 1 year\n\nRepo Agreement:\n  Borrower SELLS securities with agreement to BUY BACK later\n  Repo rate = annualized % difference in prices\n  Haircut: collateral value > loan amount (margin of safety)\n  Variation margin: required if collateral value drops\n  Tri-party repo: third party (custodian) manages collateral\n\nRepo rate ↑ when: longer term, lower quality collateral, undercollateralized\nRepo rate ↓ when: specific security is scarce (high demand to borrow)',
+ q:'A firm sells $100M of Treasury bonds in a repo at a rate of 3% for 30 days. Cash received? Repurchase price?',
+ a:'Cash received ≈ $100M (assuming no haircut). Repurchase price = 100M × (1 + 0.03×30/360) = $100,250,000.',
+ tags:[['blue','R50'],['orange','Repo']]},
+
+{id:'fi3',s:'fi',star:true,freq:true,src:'both',r:'R52',
+ name:'Bond Pricing & YTM',sub:'Fixed income valuation — R52',
+ def:'A bond\'s price equals the PV of all future cash flows discounted at the YTM. Price and yield move inversely. YTM assumes all coupons are reinvested at the YTM.',
+ formula:'Annual coupon bond:\n  P = Σ[C/(1+y)^t] + [FV/(1+y)^N]\n\nSemiannual coupon bond:\n  P = Σ[C/2/(1+y/2)^t] + [FV/(1+y/2)^(2N)]\n\nFull Price = Flat Price + Accrued Interest\n  AI = Coupon × (Days since last coupon / Days in coupon period)\n\nPrice-Yield Relationship:\n  y ↑ → P ↓  (inverse relationship)\n  Premium bond: Coupon > YTM → P > Par\n  Discount bond: Coupon < YTM → P < Par\n  Bond price → Par as maturity approaches (pull-to-par)',
+ q:'$1,000 par, 6% annual coupon, 2 years to maturity, YTM=8%. Price?',
+ a:'P = 60/1.08 + 1060/1.08² = 55.56 + 908.78 = $964.33. Discount bond (coupon<YTM → P<Par).',
+ tags:[['red','★ Exam Favorite'],['blue','R52']]},
+
+{id:'fi4',s:'fi',star:true,freq:true,src:'both',r:'R53–R54',
+ name:'Yield Measures & Spread Analysis',sub:'YTM, spreads, and FRN discount margin — R53–R54',
+ def:'Various yield measures describe different aspects of a bond\'s return. Spreads measure yield relative to a benchmark.',
+ formula:'Current Yield = Annual Coupon / Price\nYTM: IRR of all cash flows\nYield to Call (YTC): IRR assuming called at call date\nYield to Worst (YTW): lowest of YTM, YTC, YTP\n\nSpread Measures:\n  G-spread: vs. government bond yield\n  I-spread: vs. swap rate\n  Z-spread: constant spread over entire spot curve (no-arbitrage)\n  OAS (Option-Adjusted Spread): Z-spread − option value\n    → For callable bond: OAS = Z-spread − call value\n    → OAS is the "true" credit spread (option-free)\n\nFRN: Coupon = MRR + Quoted Margin\n  Discount Margin (DM): required return above MRR\n  DM > Quoted Margin → trades BELOW par (credit deteriorated)',
+ q:'A callable bond has Z-spread=150bps, call option value=30bps. OAS?',
+ a:'OAS = 150−30 = 120bps. The OAS represents the spread if the bond had no call option — the "pure" credit compensation.',
+ tags:[['red','★ Exam Favorite'],['blue','R53–R54']]},
+
+{id:'fi5',s:'fi',star:true,freq:true,src:'both',r:'R55',
+ name:'Term Structure: Spot, Par & Forward Rates',sub:'Yield curve construction — R55',
+ def:'The term structure describes the relationship between yield and maturity. Spot rates, par rates, and forward rates are three views of the same yield curve.',
+ formula:'Spot Rate (zero rate): discount rate for single future payment\n  Bond price = Σ [CFₜ / (1+Sₜ)^t]\n\nForward Rate: rate for a future period implied by spot curve\n  (1+S₂)² = (1+S₁)(1+₁f₁)\n  ₁f₁ = (1+S₂)²/(1+S₁) − 1\n\nPar Rate: coupon rate that prices bond at par using spot rates\n\nYield Curve Shapes:\n  Normal (upward): long rates > short rates (most common)\n  Inverted: short rates > long rates (signals recession)\n  Flat: all maturities ≈ same yield\n\nTheories: Expectations, Liquidity Preference, Market Segmentation, Preferred Habitat',
+ q:'1-year spot=3%, 2-year spot=4%. What is the 1-year forward rate one year from now?',
+ a:'₁f₁ = (1.04)²/1.03 − 1 = 1.0816/1.03 − 1 ≈ 5.01%.',
+ tags:[['red','★ Exam Favorite'],['blue','R55']]},
+
+{id:'fi6',s:'fi',star:true,freq:true,src:'both',r:'R56–R58',
+ name:'Duration, Convexity & Price Sensitivity',sub:'Interest rate risk measurement — R56–R58',
+ def:'Duration measures linear price sensitivity to yield changes. Convexity corrects for the curvature of the price-yield relationship.',
+ formula:'Macaulay Duration: PV-weighted avg time to receive cash flows (in years)\nModified Duration = Macaulay Duration / (1 + YTM/m)\nEffective Duration = (P₋ − P₊) / (2 × P₀ × ΔY)\n\nPrice Change (full formula):\n  ΔP/P ≈ −ModDur × ΔY + ½ × Convexity × (ΔY)²\n\nKey Properties of Duration:\n  Zero-coupon: Duration = Maturity\n  Higher coupon → lower duration\n  Longer maturity → higher duration\n  Higher YTM → lower duration\n  Callable bond → Effective Duration < Modified Duration\n\nConvexity: all else equal, higher convexity is ALWAYS preferable\n  Price rise (yield ↓) is greater than price fall (yield ↑) for same ΔY',
+ q:'ModDur=5, YTM rises 0.5%. Approximate price change? Add Convexity=50.',
+ a:'Duration-only: −5×0.005 = −2.5%. With convexity: −2.5% + ½×50×(0.005)² = −2.5%+0.0625% ≈ −2.44%. Convexity softens the blow.',
+ tags:[['red','★ Exam Favorite'],['blue','R56–R58']]},
+
+{id:'fi7',s:'fi',star:true,freq:true,src:'both',r:'R59',
+ name:'Curve-Based Risk: KRD & Empirical Duration',sub:'Advanced interest rate risk — R59',
+ def:'Key rate duration (KRD) measures sensitivity to changes at specific maturities on the yield curve. Empirical duration is estimated from historical price-yield data rather than formulas.',
+ formula:'Key Rate Duration (KRD):\n  Measures price sensitivity to a 1bp change at a specific maturity\n  Portfolio KRD = Σ(wᵢ × KRDᵢ)\n  Allows hedging against non-parallel shifts (twists, humps)\n\nEmpirical Duration:\n  Estimated from regression of price changes on yield changes\n  Can differ from analytical duration for bonds with optionality\n\nYield Curve Risks:\n  Parallel shift: all rates move equally (captured by duration)\n  Twist: short rates and long rates diverge\n  Hump: intermediate rates move more than short/long',
+ q:'A bond\'s analytical duration=7, but empirical duration from regression=4.5. Why might they differ?',
+ a:'The bond likely has embedded options (e.g., callable) or other features that cause price behavior to deviate from the simple price-yield formula. Empirical duration captures actual market behavior.',
+ tags:[['blue','R59'],['purple','Advanced FI']]},
+
+{id:'fi8',s:'fi',star:true,freq:true,src:'both',r:'R60–R62',
+ name:'Credit Risk & Credit Analysis',sub:'Default risk and analysis — R60–R62',
+ def:'Credit risk is the risk of loss from a borrower\'s failure to make payments. Analysis differs for corporate and government issuers.',
+ formula:'Credit Risk Components:\n  PD: Probability of Default\n  LGD: Loss Given Default = 1 − Recovery Rate\n  EL: Expected Loss = PD × LGD × EAD\n\nCredit Spread = YTM_risky − YTM_risk-free\n\nCorporate Credit Analysis (4 Cs or SPECTRUM):\n  Capacity (cash flow/earnings quality)\n  Collateral (asset quality)\n  Covenants (bond indenture protections)\n  Character (management integrity/track record)\n\nSovereign Credit Analysis:\n  Developed markets: diverse economy, stable fiscal policy, reserve currency\n  Emerging markets: concentrated economy, FX risk, rollover risk',
+ q:'A BBB-rated bond\'s spread suddenly widens from 100bps to 200bps. What does this signal?',
+ a:'Deteriorating perceived credit quality — investors demand higher compensation for default risk. Could reflect earnings deterioration, increased leverage, or broader credit market stress (flight to quality).',
+ tags:[['red','★ Exam Favorite'],['blue','R60–R62']]},
+
+{id:'fi9',s:'fi',star:true,freq:true,src:'both',r:'R47–R51',
+ name:'Securitization & Mortgage-Backed Securities',sub:'Structured products — R48',
+ def:'Securitization pools assets and issues securities backed by their cash flows. MBS pass through mortgage principal and interest to investors, with prepayment risk as the key distinctive feature.',
+ formula:'Securitization Structure:\n  Originator → SPV (special purpose vehicle) → Issues ABS/MBS\n  SPV legally separate → bankruptcy remote\n\nMBS Prepayment Risk:\n  Extension risk: rates ↑ → prepayments ↓ → duration extends\n  Contraction risk: rates ↓ → prepayments ↑ → duration shortens\n  Negative convexity: callable-like behavior\n\nCredit Enhancement:\n  Internal: subordination (tranching), overcollateralization, reserve fund\n  External: third-party guarantees, letters of credit\n\nTranching: Senior → Mezzanine → Junior/Equity\n  Junior absorbs losses first → higher yield, lower credit rating',
+ q:'Rates fall sharply. How does an MBS investor lose compared to a regular bond investor?',
+ a:'MBS: prepayments accelerate → principal returned early → must reinvest at lower rates (reinvestment risk). Also: price appreciation is capped (negative convexity). Regular bond: benefits fully from falling rates with positive convexity.',
+ tags:[['red','★ Exam Favorite'],['orange','MBS'],['blue','R48']]},
+
+// ══ DERIVATIVES R63–R75 ══
+{id:'d1',s:'deriv',star:true,freq:true,src:'both',r:'R63–R66',
+ name:'Forward & Futures Contracts',sub:'Pricing and hedging — R63–R66',
+ def:'Forwards and futures are agreements to buy/sell an asset at a specified price on a future date. Futures are exchange-traded with daily mark-to-market.',
+ formula:'Forward Price = S₀ × (1+r)^T − FV(Benefits) + FV(Costs)\n  With dividends: F = (S₀ − PV(Div)) × (1+r)^T\n  With carry costs: F = S₀ × e^(r+c−y)T\n\nForward Value (at time t):\n  V_t = S_t − PV(F₀)  [long forward]\n\nFutures vs. Forwards:\n  Futures: exchange-traded, standardized, daily MTM, margin required\n  Forwards: OTC, customized, single settlement at maturity, credit risk\n\nBasis = Spot − Futures  (converges to 0 at expiration)\nBasis Risk: hedging imperfection when underlying ≠ futures asset',
+ q:'S₀=$100, r=5%, T=1 year, stock pays $3 dividend in 6 months. Forward price?',
+ a:'PV(Div) = 3/(1.05)^0.5 = $2.929. F = (100−2.929)×1.05 = $102.0.',
+ tags:[['red','★ Exam Favorite'],['blue','R63–R64']]},
+
+{id:'d2',s:'deriv',star:true,freq:true,src:'both',r:'R67–R68',
+ name:'Swap Contracts',sub:'Interest rate and currency swaps — R67–R68',
+ def:'Swaps are agreements to exchange cash flows. The most common are interest rate swaps (fixed for floating) and currency swaps.',
+ formula:'Interest Rate Swap:\n  Pay fixed, receive floating: benefits when rates rise\n  Pay floating, receive fixed: benefits when rates fall\n\n  Swap Fixed Rate = rate that makes PV(fixed) = PV(floating) at initiation\n  Swap Value at time t = PV(remaining fixed CF) − PV(remaining floating CF)\n\nCurrency Swap:\n  Exchange principal AND interest in different currencies\n  Used to convert foreign currency debt to domestic currency\n\nFRA (Forward Rate Agreement):\n  Agreement on a future interest rate for a notional amount\n  Settled in cash based on difference between agreed and market rate',
+ q:'A company has floating-rate debt (SOFR+2%) and fears rates will rise. What swap should it enter?',
+ a:'Pay-fixed, receive-floating swap. The floating received offsets the floating debt payment, leaving only the fixed rate net exposure — effectively converting floating debt to fixed.',
+ tags:[['red','★ Exam Favorite'],['blue','R67–R68']]},
+
+{id:'d3',s:'deriv',star:true,freq:true,src:'both',r:'R69–R73',
+ name:'Options: Pricing & Put-Call Parity',sub:'Option valuation — R69–R73',
+ def:'Options give the holder the right (not obligation) to buy (call) or sell (put) an asset. Put-call parity is a fundamental no-arbitrage relationship.',
+ formula:'Option Payoffs:\n  Call: max(0, S−X)  /  Put: max(0, X−S)\n\nOption Value = Intrinsic Value + Time Value\n  Intrinsic Value (Call) = max(0, S−X)\n  Time Value = Option Price − Intrinsic Value\n\nPut-Call Parity (European, no dividends):\n  C + PV(X) = P + S\n  C = P + S − PV(X)\n\nOption Price Factors:\n  S ↑ → Call ↑, Put ↓\n  X ↑ → Call ↓, Put ↑\n  T ↑ → both ↑ (more time = more uncertainty)\n  σ ↑ → both ↑ (more volatility = higher option value)\n  r ↑ → Call ↑, Put ↓\n\nStrategies: Covered call = S + short call | Protective put = S + long put',
+ q:'S=$50, X=$52, Rf=5%, T=1yr, Put=$4. Call price (put-call parity)?',
+ a:'C = P + S − PV(X) = 4 + 50 − 52/1.05 = 4+50−49.52 = $4.48.',
+ tags:[['red','★ Exam Favorite'],['blue','R69–R73']]},
+
+{id:'d4',s:'deriv',star:true,freq:true,src:'both',r:'R74–R75',
+ name:'Option Greeks',sub:'Sensitivity measures — R74–R75',
+ def:'Greeks measure how option prices respond to changes in key variables. Essential for hedging and risk management.',
+ formula:'Delta (Δ): ΔOption/ΔS\n  Call: 0 to 1  |  Put: −1 to 0\n  ATM ≈ 0.5 for call, −0.5 for put\n\nGamma (Γ): Δ of Delta / ΔS (curvature)\n  Highest when ATM, near expiration\n  Long options: positive gamma (beneficial)\n\nVega: ΔOption/Δσ (volatility sensitivity)\n  Both calls and puts have positive vega\n\nTheta (Θ): ΔOption/ΔTime (time decay)\n  Long options: negative theta (lose value as time passes)\n  Accelerates near expiration\n\nRho: ΔOption/Δr\n  Call: positive rho  |  Put: negative rho',
+ q:'A call has Delta=0.6, Gamma=0.05. Stock rises $2. New approximate Delta?',
+ a:'Price change ≈ 0.6×$2 = $1.20. New Delta ≈ 0.6 + 0.05×$2 = 0.70.',
+ tags:[['green','High-Frequency'],['blue','R74–R75']]},
+
+// ══ ALTERNATIVES R76–R82 ══
+{id:'a1',s:'alt',star:true,freq:true,src:'both',r:'R76–R77',
+ name:'Alternative Investments: Structure & Returns',sub:'Overview and performance measurement — R76–R77',
+ def:'Alternative investments include hedge funds, private equity, real assets, and digital assets. They offer diversification but come with illiquidity, higher fees, and complexity.',
+ formula:'Categories: Hedge funds, Private Capital (PE & PD),\n  Real Assets (RE, infra, commodities, farmland), Digital Assets\n\nJ-Curve Effect:\n  Capital commitment phase: negative returns (fees, investments)\n  Capital deployment phase: less negative\n  Capital distribution phase: positive returns\n\nReturn Measures:\n  IRR: time-value adjusted return (appropriate when GP controls cash flows)\n  MOIC = Realized + Unrealized Value / Capital Invested\n  (MOIC simple; IRR time-sensitive)\n\nFair Value Hierarchy:\n  Level 1: quoted prices in active markets\n  Level 2: observable market inputs\n  Level 3: unobservable inputs (model-dependent)\n  → L3 assets: returns may be overstated, risk understated',
+ q:'A PE fund has MOIC=2.5× over 5 years. Is this good without knowing the IRR?',
+ a:'Not conclusive. MOIC=2.5× means you got back 2.5× invested capital. But without the IRR, we don\'t know if the return was achieved quickly (great) or over 10 years (mediocre). IRR provides time context.',
+ tags:[['red','★ Exam Favorite'],['blue','R76–R77']]},
+
+{id:'a2',s:'alt',star:true,freq:true,src:'both',r:'R78',
+ name:'Private Equity: VC, LBO & PE Waterfall',sub:'Private equity strategies — R78',
+ def:'Private equity invests in private companies or takes public companies private. Returns come from operational improvement, leverage, and multiple expansion.',
+ formula:'Venture Capital Stages:\n  Angel/Seed → Early stage → Later stage → Mezzanine/Pre-IPO\n\nLBO Structure:\n  Acquire mature firm using mostly debt (60-70%)\n  Value creation: operational improvement, leverage, exit multiple\n  Exit options: IPO, trade sale, secondary sale, recapitalization\n\nPE Waterfall Distribution:\n  1. Return of Capital to LPs\n  2. Preferred Return (hurdle rate, e.g., 8%) to LPs\n  3. Catch-up (GP receives share to "catch up")\n  4. Carried Interest: GP 20% / LP 80%\n\nDeal-by-deal: carry per investment (GP-favorable)\nWhole-of-fund: carry on total performance (LP-protective)',
+ q:'A fund returns $300M from a $100M investment after 5 years. Hurdle=8%, Carry=20%. GP\'s carried interest?',
+ a:'Profit above hurdle: $300M total − $100M capital − $46.9M (8% hurdle for 5 years on $100M) = $153.1M excess. GP carry = 20% × $153.1M ≈ $30.6M.',
+ tags:[['red','★ Exam Favorite'],['blue','R78']]},
+
+{id:'a3',s:'alt',star:true,freq:true,src:'both',r:'R79',
+ name:'Real Estate & Infrastructure',sub:'Real asset investing — R79',
+ def:'Real estate and infrastructure provide inflation-hedging, income, and diversification. Greenfield vs. brownfield distinction is important.',
+ formula:'Direct RE: full control, tax benefits, illiquidity, concentration risk\nIndirect RE: REITs, CMBS — liquid, diversified, professionally managed\n\nREIT Strategies:\n  Core: stable, high-quality properties (bond-like)\n  Core-plus: some redevelopment (moderate risk)\n  Value-add: major redevelopment (higher risk)\n  Opportunistic: highest risk/return\n\nNOI = Gross Rental Income − Vacancy − Operating Expenses\nCap Rate = NOI / Property Value\nV = NOI / Cap Rate  (income approach)\n\nInfrastructure:\n  Brownfield: existing, operational → lower risk\n  Greenfield: new construction → higher risk\n  Demand-based: riskiest type',
+ q:'Property NOI=$500K, Cap Rate=5%. Value? What if cap rate rises to 6%?',
+ a:'V = 500K/0.05 = $10M. At 6%: V = 500K/0.06 = $8.33M. Cap rate rise = value decline (like bond: yield ↑ → price ↓).',
+ tags:[['green','High-Frequency'],['blue','R79']]},
+
+{id:'a4',s:'alt',star:false,freq:true,src:'schweser',r:'R80',
+ name:'Commodities: Contango, Backwardation & Convenience Yield',sub:'Commodity investing — R80',
+ def:'Commodity investing provides inflation hedging and low correlation to traditional assets. Futures pricing is driven by cost of carry and convenience yield.',
+ formula:'Futures Price = Spot + Net Cost of Carry\n  Net Cost of Carry = Storage Costs + Financing Costs − Convenience Yield\n\nContango: F > S  (net carry positive)\n  → Roll return is negative for long investor (buy high, roll to higher)\n\nBackwardation: F < S  (convenience yield exceeds carry costs)\n  → Roll return is positive for long investor (buy low, roll to lower)\n\nTotal Commodity Return:\n  = Spot Return + Roll Return + Collateral Return\n\nConvenience Yield: benefit of physically holding the commodity\n  (e.g., production certainty, avoiding stockout)',
+ q:'Oil futures are in backwardation (near-term futures > far-term futures). Good or bad for long-only investors?',
+ a:'Good — positive roll return. As the near contract expires, rolling to a lower-priced far contract generates profit. Long investors benefit from backwardation.',
+ tags:[['green','High-Frequency'],['blue','R80']]},
+
+{id:'a5',s:'alt',star:true,freq:true,src:'both',r:'R81',
+ name:'Hedge Funds: Strategies & Biases',sub:'Hedge fund investment — R81',
+ def:'Hedge funds use diverse strategies to generate absolute returns. Performance measurement is complicated by structural biases.',
+ formula:'Strategies:\n  Equity Hedge: long/short equities\n  Event-driven: M&A arbitrage, distressed/restructuring\n  Relative Value: pricing anomalies (convertible arb, fixed income arb)\n  Opportunistic/Macro: global macro, managed futures (CTA)\n\nFee Structure: "2 and 20"\n  Management fee: 2% of AUM annually\n  Performance fee: 20% of profits\n  High Water Mark: performance fee only on new profits above prior peak\n  Hurdle Rate: minimum return before performance fee kicks in\n\nReturn Biases:\n  Survivorship bias: only successful funds remain → overstates returns\n  Backfill bias: add track record when joining database → selection bias\n  Smoothing bias: infrequent L3 valuations → understates volatility',
+ q:'$100M hedge fund, 30% return in year 1, 2/20 fee. Net return to investor?',
+ a:'Management fee = $2M. Performance fee = 20%×$30M = $6M. Total fees=$8M. Net gain = $30M−$8M = $22M. Net return = 22%.',
+ tags:[['red','★ Exam Favorite'],['blue','R81']]},
+
+{id:'a6',s:'alt',star:false,freq:true,src:'schweser',r:'R82',
+ name:'Digital Assets & Blockchain',sub:'Cryptocurrency and DLT — R82',
+ def:'Digital assets rely on distributed ledger technology (DLT). They have unique characteristics compared to traditional financial instruments.',
+ formula:'Blockchain: sequential blocks of transaction records, cryptographically linked\nConsensus Mechanisms:\n  Proof of Work (PoW): miners solve computationally hard problems\n  Proof of Stake (PoS): validators pledge collateral (more energy-efficient)\n\nNetwork Types:\n  Permissionless: open to all (Bitcoin, Ethereum)\n  Permissioned: access controlled (enterprise blockchains)\n\nDigital Asset Types:\n  Cryptocurrency: decentralized digital currency (Bitcoin)\n  Stablecoin: pegged to fiat or asset\n  CBDC: central bank digital currency\n  Tokens: represent ownership or access rights\n  Tokenization: digitally representing ownership of real assets\n\nKey Risk: no fundamental value (no cash flows, no backing)',
+ q:'How does Proof of Stake differ from Proof of Work in terms of resource use?',
+ a:'PoS uses pledged collateral (economic stake) rather than computational power to validate transactions → far more energy-efficient. PoW (Bitcoin) consumes massive electricity; PoS (Ethereum) does not.',
+ tags:[['blue','R82'],['purple','Fintech']]},
+
+// ══ PORTFOLIO MANAGEMENT R83–R88 ══
+{id:'p1',s:'pm',star:true,freq:true,src:'both',r:'R83',
+ name:'Risk Aversion & Indifference Curves',sub:'Investor preferences — R83',
+ def:'Risk-averse investors require higher expected returns to accept more risk. Indifference curves represent combinations of risk and return that provide equal utility.',
+ formula:'Risk-averse: prefer less risk given equal expected return\nRisk-seeking: prefer more risk given equal expected return\nRisk-neutral: indifferent to risk; choose highest expected return\n\nIndifference Curves:\n  Upward-sloping (risk-averse) → more risk requires more return compensation\n  Steeper curve = more risk averse\n  Optimal portfolio: where indifference curve is tangent to efficient frontier\n\nUtility Function: U = E(R) − ½·A·σ²\n  A = risk aversion coefficient\n  Higher A → more risk averse → steeper indifference curves',
+ q:'Investor A has A=4 (utility function). Portfolio: E(R)=10%, σ=15%. Utility?',
+ a:'U = 0.10 − ½×4×(0.15)² = 0.10 − 0.5×4×0.0225 = 0.10−0.045 = 5.5%. Higher utility = preferred portfolio.',
+ tags:[['blue','R83'],['orange','Risk Preferences']]},
+
+{id:'p2',s:'pm',star:true,freq:true,src:'both',r:'R83',
+ name:'Portfolio Mathematics & Efficient Frontier',sub:'Mean-variance optimization — R83',
+ def:'The efficient frontier shows the set of portfolios offering maximum return for each risk level. Diversification reduces non-systematic risk without reducing expected return.',
+ formula:'E(Rp) = wA·E(RA) + wB·E(RB)\nσ²p = w²A·σ²A + w²B·σ²B + 2·wA·wB·CovAB\n   = w²A·σ²A + w²B·σ²B + 2·wA·wB·ρ·σA·σB\n\nCorrelation and Diversification:\n  ρ=+1: no diversification benefit (single line)\n  ρ=0: significant benefit\n  ρ=−1: perfect hedge (σp=0 possible)\n\nCML (Capital Market Line): E(Rp) = Rf + [(E(Rm)−Rf)/σm]·σp\n  Tangency portfolio: optimal risky portfolio on CML\n\nKey insight: Investors should hold the market portfolio + risk-free asset',
+ q:'Two assets: E(RA)=10%,σA=20%; E(RB)=15%,σB=30%; ρ=0. Equal-weight portfolio: E(R) and σ?',
+ a:'E(Rp) = 0.5×10+0.5×15 = 12.5%. σ²p = 0.25×400+0.25×900 = 325. σp = √325 ≈ 18.0%. Much less than 0.5×20+0.5×30=25%.',
+ tags:[['red','★ Exam Favorite'],['blue','R83']]},
+
+{id:'p3',s:'pm',star:true,freq:true,src:'both',r:'R84',
+ name:'Systematic Risk, Beta & SML',sub:'CAPM and factor models — R84',
+ def:'Systematic risk (market risk) cannot be diversified away. Beta measures systematic risk relative to the market. The Security Market Line (SML) prices systematic risk.',
+ formula:'β = Cov(Ri,Rm)/Var(Rm) = ρ·(σi/σm)\nE(Ri) = Rf + βi·[E(Rm)−Rf]  [CAPM]\n\nReturn-Generating Models:\n  Market model: Ri = αi + βi·Rm + eᵢ\n  Multi-factor: Ri = Rf + β₁·F₁ + β₂·F₂ + ...\n\nPerformance Measures:\n  Sharpe = (Rp−Rf)/σp  (total risk)\n  Treynor = (Rp−Rf)/β  (systematic risk)\n  Jensen\'s Alpha = Rp − [Rf+β(Rm−Rf)]\n  Information Ratio = Alpha/Tracking Error\n  M² = (Rp−Rf)×(σm/σp)+Rf  (risk-adjusted to market σ)',
+ q:'Fund: R=15%, β=1.2, σ=20%. Rf=3%, Rm=10%, σm=15%. Sharpe, Treynor, Jensen\'s Alpha?',
+ a:'Sharpe=(15−3)/20=0.60. Treynor=(15−3)/1.2=10.0. Jensen\'s α=15−[3+1.2×7]=15−11.4=+3.6% (outperformed CAPM expectation).',
+ tags:[['red','★ Exam Favorite'],['blue','R84']]},
+
+{id:'p4',s:'pm',star:true,freq:true,src:'both',r:'R85–R86',
+ name:'Portfolio Management Process & IPS',sub:'Planning, execution, feedback — R85–R86',
+ def:'The portfolio management process has three stages: planning, execution, and feedback. The IPS documents objectives and constraints.',
+ formula:'3-Step Process:\n  1. Planning: assess client needs, create IPS\n  2. Execution: asset allocation, security selection\n  3. Feedback: monitor, rebalance, report performance\n\nIPS Constraints (TTLLU):\n  Time Horizon: investment period (multi-stage for most clients)\n  Taxes: impact on after-tax returns\n  Liquidity: cash flow needs\n  Legal & Regulatory: restrictions\n  Unique: personal preferences, ESG, concentration\n\nRisk Objectives:\n  Absolute: "no loss >10% in any year"\n  Relative: "within 2% of benchmark"\n\nDefined Contribution: employee bears investment risk\nDefined Benefit: employer bears investment risk',
+ q:'A 35-year-old investor plans to retire at 65 and expects to live to 90. What is the investment time horizon?',
+ a:'55 years (retirement at 65 = 30 years, post-retirement = 25 more years). A multi-stage IPS should address both the accumulation phase and the distribution phase.',
+ tags:[['red','★ Exam Favorite'],['blue','R85–R86']]},
+
+{id:'p5',s:'pm',star:true,freq:true,src:'both',r:'R85',
+ name:'Asset Allocation & Rebalancing',sub:'Strategic vs. tactical allocation — R85',
+ def:'Strategic Asset Allocation (SAA) is the long-term target. Tactical Asset Allocation (TAA) involves short-term deviations. Rebalancing restores target weights.',
+ formula:'SAA: long-term weights based on IPS objectives\nTAA: deliberate short-term deviation from SAA to exploit market views\n\nRebalancing Methods:\n  Calendar rebalancing: at fixed intervals (monthly, quarterly)\n  Threshold/Corridor: rebalance when allocation drifts beyond band\n  Constant-mix: maintain fixed weights (buy dips, sell rallies)\n\nPooled Investments:\n  Mutual funds (open-end): priced once daily at NAV\n  ETFs: trade intraday at market price, lower cost\n  Separately Managed Accounts (SMA): individual ownership\n  Hedge funds: accredited investors, complex strategies',
+ q:'SAA is 60% equity/40% bonds. Equity rallies and portfolio drifts to 70/30. What should happen?',
+ a:'Rebalance: sell equities, buy bonds to restore 60/40. This is mechanically contrarian (sells outperformers, buys underperformers). Consider transaction costs and taxes.',
+ tags:[['green','High-Frequency'],['blue','R85']]},
+
+{id:'p6',s:'pm',star:true,freq:true,src:'both',r:'R88',
+ name:'Risk Management: VaR & Framework',sub:'Risk identification and measurement — R88',
+ def:'Risk management is the process of identifying, measuring, and managing risks to achieve investment objectives while controlling exposures within tolerance.',
+ formula:'VaR = Portfolio Value × σ × z\n  95% confidence (1-day): z=1.645\n  99% confidence (1-day): z=2.326\n\nCVaR (Expected Shortfall): expected loss GIVEN loss exceeds VaR\n  → Captures tail risk better than VaR\n\nRisk Types:\n  Market risk: price movements (equity, rates, FX, commodities)\n  Credit risk: counterparty default\n  Liquidity risk: inability to sell or fund positions\n  Operational risk: system/process/human failures\n  Regulatory/Legal risk\n\nRisk budgeting: allocate risk across strategies/managers\nScenario analysis: estimate P&L under specific scenarios\nStress testing: evaluate extreme but plausible scenarios',
+ q:'$10M portfolio, σ=1.5%/day, 99% confidence. 1-day VaR?',
+ a:'VaR = $10M × 0.015 × 2.326 = $349,000. There is a 1% chance of losing more than $349K on any given day.',
+ tags:[['red','★ Exam Favorite'],['blue','R88']]},
+
+{id:'p7',s:'pm',star:true,freq:true,src:'both',r:'R85',
+ name:'GIPS Standards',sub:'Global Investment Performance Standards — R85',
+ def:'GIPS is a voluntary set of standards for calculating and reporting investment performance. Ensures fair, comparable disclosure.',
+ formula:'Key Requirements:\n  Composite: group all accounts managed to same strategy\n  Minimum 5-year track record (or since inception)\n  Time-weighted return (eliminates cash flow impact)\n  Annual returns required (monthly recommended)\n  GIPS-compliant firms: "claim compliance" rather than "certified"\n\nGIPS Verification: independent third-party check\n  Firm-level (not composite-level) verification\n\nPooled Fund Reporting: GIPS 2020 added specific requirements\n\nWhy TWR: external cash flows are investor decisions,\n  not manager skill — TWR isolates manager contribution',
+ q:'Why does GIPS require time-weighted returns rather than money-weighted returns?',
+ a:'Portfolio managers typically do not control external cash flows (client deposits/withdrawals). TWR eliminates the distortion caused by cash flow timing, measuring only the manager\'s investment decisions.',
+ tags:[['blue','R85'],['green','High-Frequency']]},
+
+// ══ ETHICS ══
+{id:'eth1',s:'ethics',star:true,freq:true,src:'both',r:'R89–R92',
+ name:'CFA Code of Ethics & 7 Standards',sub:'Professional conduct framework — R89–R92',
+ def:'The CFA Code of Ethics and Standards of Professional Conduct govern member and candidate behavior. Standards are organized into 7 categories.',
+ formula:'Standard I: Professionalism\n  I(A): Knowledge of Law — follow stricter of law vs Standards\n  I(B): Independence & Objectivity\n  I(C): Misrepresentation\n  I(D): Misconduct\n\nStandard II: Integrity of Capital Markets\n  II(A): Material Non-public Information\n  II(B): Market Manipulation\n\nStandard III: Duties to Clients\n  III(A): Loyalty, Prudence, and Care (Fiduciary Duty)\n  III(B): Fair Dealing\n  III(C): Suitability\n  III(D): Performance Presentation\n  III(E): Preservation of Confidentiality\n\nStandard IV: Duties to Employers\nStandard V: Investment Analysis & Recommendations\n  V(A): Diligence and Reasonable Basis\nStandard VI: Conflicts of Interest\n  VI(B): Priority of Transactions (client first)\nStandard VII: CFA Responsibilities',
+ q:'Stricter standard applies — if local law requires X and CFA Standards require Y, and Y is stricter, what must a member do?',
+ a:'Follow CFA Standards (Y). I(A) requires always following the stricter requirement. If local law were stricter, follow local law instead.',
+ tags:[['red','★ Exam Favorite'],['blue','R89–R92']]},
+
+{id:'eth2',s:'ethics',star:true,freq:true,src:'both',r:'R93',
+ name:'Material Non-Public Information & Mosaic Theory',sub:'Standard II(A) — R93',
+ def:'Trading on material non-public information (MNPI) is prohibited. Mosaic theory allows combining public and non-material non-public information.',
+ formula:'Material Information: reasonable investor would consider it significant\n  Examples: earnings surprise, merger announcement, major contract\n\nNon-Public: not yet disseminated to the market\n\nBoth material AND non-public → trading prohibited\n\nMosaic Theory:\n  Public information + non-material non-public information\n  → Combining LEGALLY generates investment conclusions\n\nFirewall: information barrier between banking and research\n\nTipping: passing MNPI to others is also prohibited\n  (both tipper and tippee may be liable)\n\nOverheard information still qualifies as MNPI',
+ q:'An analyst hears from a supplier that a major customer just cancelled a large order. Can they trade?',
+ a:'No — this is likely MNPI (material and non-public). Must report to compliance and not trade or tip others until the information becomes public.',
+ tags:[['red','★ Exam Favorite'],['blue','R93']]},
+
+{id:'eth3',s:'ethics',star:true,freq:true,src:'both',r:'R94',
+ name:'Priority of Transactions & Conflicts of Interest',sub:'Standard VI(B) & III(A) — R94',
+ def:'Clients\' interests must come before employers\' and members\' own interests. Members must disclose conflicts and avoid using their position for personal benefit.',
+ formula:'Priority Order: Client → Employer → Member (personal)\n\nFront Running: trading for own account before executing client orders → PROHIBITED\n\nChurning: excessive trading to generate commissions → PROHIBITED\n\nSoft Dollars: using commission dollars to buy research/services\n  → Allowed if benefit clients; must be disclosed\n\nReferral Fees: must disclose to all parties\n\nFiduciary Duty (III(A)):\n  Loyalty: client interests always first\n  Prudence: exercise care and skill\n  Care: act in client\'s best interest\n\nSuitability: recommendations must match client\'s IPS, needs, and risk tolerance',
+ q:'A broker recommends their firm\'s proprietary fund over a better-performing competitor fund. What standard is violated?',
+ a:'Standard III(A) — Loyalty, Prudence, and Care. Putting employer interest (fund sales) above client interest (better returns) violates fiduciary duty.',
+ tags:[['red','★ Exam Favorite'],['blue','R94']]},
+
+{id:'eth4',s:'ethics',star:true,freq:true,src:'both',r:'R95–R96',
+ name:'GIPS & Performance Presentation',sub:'Standard III(D) and GIPS — R95–R96',
+ def:'Performance must be presented fairly and accurately. GIPS provides global standards for performance reporting.',
+ formula:'Standard III(D): Performance Presentation\n  Must not misrepresent past performance\n  Cannot cherry-pick time periods\n  Must include terminated portfolios in composites\n\nStandard V(A): Reasonable Basis\n  Must have diligence and adequate research before recommending\n  Secondary research reliance must be reasonable\n\nRecord Retention: 7 years recommended\n\nMisrepresentation (I(C)):\n  Cannot guarantee specific investment returns\n  Cannot misstate qualifications\n  Cannot plagiarize research (must cite sources)\n\nGIPS compliance: "firm" claims compliance (not individual portfolios)',
+ q:'An analyst publishes a research report and does not cite the source of data used. Which standard is violated?',
+ a:'Standard I(C) — Misrepresentation (specifically plagiarism). Must attribute sources properly even when summarizing or building on others\' work.',
+ tags:[['green','High-Frequency'],['blue','R95–R96']]},
+
+{id:'eth5',s:'ethics',star:false,freq:true,src:'schweser',r:'R89–R96',
+ name:'Market Manipulation & Research Standards',sub:'Standards II(B) and V — R89–R96',
+ def:'Market manipulation uses false information or deceptive trading practices to distort prices. Research reports must meet high standards of integrity.',
+ formula:'Market Manipulation (II(B)):\n  Information-based: spreading false/misleading info to move prices\n  Transaction-based: trades that create artificial price/volume signals\n  (wash trades, painting the tape, spoofing)\n\nResearch Standards (V):\n  V(A): Reasonable Basis — adequate research before recommending\n  V(B): Communication — distinguish fact from opinion\n  V(C): Record Retention — 7 years\n\nSoft Dollar Standards:\n  Directed brokerage: client directs trades to specific broker\n  Must disclose arrangements to clients\n  Research can be "bundled" with execution if it benefits clients\n\nFINRA Rule 5131: no allocating "hot" IPOs to financial industry personnel\n  (spinning — rewarding future business)',
+ q:'A hedge fund manager places large buy orders and immediately cancels them to create the appearance of demand. What violation?',
+ a:'Market manipulation — transaction-based (spoofing/layering). Creates artificial impression of buying interest to push prices up, then profits by selling at inflated prices.',
+ tags:[['red','★ Exam Favorite'],['blue','R89–R96']]}
+
+]; // end CONCEPTS array
+
+// ─── RENDER ENGINE ───
+let currentSubject='all', currentFilter='all';
+
+function buildCard(c){
+  const star=c.star?'<span class="star-badge">★</span>':'';
+  const sc=c.star?' is-star':'';
+  const newBadge=c.src==='schweser'?'<span class="tag tag-blue">Schweser</span>':'';
+  const freqBadge=c.freq?'<span class="tag tag-red">High Freq</span>':'';
+  const tags=c.tags.map(([cl,lb])=>`<span class="tag tag-${cl}">${lb}</span>`).join('');
+  return `<div class="concept-card${sc}" data-subject="${c.s}" data-star="${c.star}" data-freq="${c.freq}" data-src="${c.src}" data-id="${c.id}" data-r="${c.r}">
+  <div class="card-header" onclick="toggleCard(this)">
+    <div>
+      <div class="name-row">${star}<span class="concept-name">${c.name}</span></div>
+      <div class="concept-sub">${c.sub}</div>
+    </div>
+    <span class="expand-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="section-label">Definition</div>
+    <div class="definition">${c.def.replace(/\n/g,'<br>')}</div>
+    ${c.formula?`<div class="section-label">Formula / Key Concepts</div><div class="formula-box">${c.formula}</div>`:''}
+    <div class="section-label">Example Question</div>
+    <div class="example-box">
+      <div class="example-q">Q. ${c.q}</div>
+      <div class="example-a">A. ${c.a}</div>
+    </div>
+    <div class="tag-row">${newBadge}${freqBadge}${tags}</div>
+  </div>
+</div>`;
+}
+
+
+// ─── SIMILAR CONCEPTS MAP ───
+// Maps concept id → array of {id, label} related concepts
+const SIMILAR = {
+  // QUANT
+  'q1':  [{id:'q1b',l:'Interest Rate Components'},{id:'q1c',l:'Arithmetic / Geometric / Harmonic Mean'},{id:'p7',l:'GIPS (TWR)'}],
+  'q1b': [{id:'q1',l:'TWR vs MWR'},{id:'e2',l:'Monetary & Fiscal Policy'},{id:'fi3',l:'Bond Pricing & YTM'}],
+  'q1c': [{id:'q1',l:'TWR vs MWR'},{id:'q3',l:'Downside Deviation & CV'},{id:'q4b',l:'Expected Value & Variance'}],
+  'q2':  [{id:'c2',l:'Working Capital & Capital Budgeting'},{id:'c3',l:'WACC'},{id:'eq1',l:'Gordon Growth Model'}],
+  'q2b': [{id:'d1',l:'Forward & Futures'},{id:'fi3',l:'Bond Pricing & YTM'},{id:'eq1',l:'Gordon Growth DDM'}],
+  'q3':  [{id:'q1c',l:'Arithmetic/Geometric/Harmonic Mean'},{id:'q3b',l:'Skewness & Kurtosis'},{id:'p2',l:'Portfolio Math & Efficient Frontier'}],
+  'q3b': [{id:'q3',l:'Downside Deviation & CV'},{id:'p1',l:'Risk Aversion'},{id:'a5',l:'Hedge Fund Biases'}],
+  'q4':  [{id:'q2',l:'Sharpe Ratio'},{id:'p3',l:'Jensen Alpha & Treynor'},{id:'p6',l:'VaR & Risk Framework'}],
+  'q4b': [{id:'q4',l:'Safety First Ratio'},{id:'p2',l:'Portfolio Math'},{id:'q1c',l:'Arithmetic/Geometric Mean'}],
+  'q7':  [{id:'q8',l:'Type I & II Error'},{id:'q9',l:'Spearman Rank Correlation'},{id:'q10',l:'OLS Regression'}],
+  'q8':  [{id:'q7',l:'Sampling & CLT'},{id:'q10',l:'OLS Regression'},{id:'q9',l:'Spearman Rank Correlation'}],
+  'q9':  [{id:'q10',l:'OLS Regression'},{id:'q3',l:'Downside Deviation & CV'},{id:'q7',l:'Sampling & CLT'}],
+  'q10': [{id:'q9',l:'Spearman Rank Correlation'},{id:'q8',l:'Type I & II Error'},{id:'p3',l:'Jensen Alpha & Treynor'}],
+  'q11': [{id:'a6',l:'Digital Assets & Blockchain'},{id:'a5',l:'Hedge Fund Biases'},{id:'p5',l:'GIPS Standards'}],
+
+  // ECONOMICS
+  'e1':  [{id:'e2',l:'Business Cycles & Policy'},{id:'e3',l:'International Trade & FX'},{id:'c1',l:'Corporate Governance & ESG'}],
+  'e2':  [{id:'e2b',l:'Central Bank Tools'},{id:'e1',l:'Market Structures (HHI)'},{id:'fi9',l:'Term Structure Theories'}],
+  'e2b': [{id:'e2',l:'Business Cycles & Fiscal Policy'},{id:'fi5',l:'Spot Rate & Forward Rate'},{id:'fi9',l:'Term Structure'}],
+  'e3':  [{id:'e5',l:'Forward FX & Cross Rates'},{id:'e4',l:'Geopolitics & Globalization'},{id:'d1',l:'Forward & Futures'}],
+  'e4':  [{id:'e3',l:'International Trade & FX'},{id:'c1',l:'Corporate Governance & ESG'},{id:'e1',l:'Market Structures'}],
+  'e5':  [{id:'e3',l:'International Trade & FX'},{id:'d1',l:'Forward & Futures Contracts'},{id:'d2',l:'Swap Contracts'}],
+
+  // CORPORATE FINANCE
+  'c1':  [{id:'eq6',l:'ESG Investing'},{id:'eth1',l:'CFA Standards'},{id:'c4',l:'MM Proposition'}],
+  'c2':  [{id:'c3',l:'WACC'},{id:'f5',l:'Cash Flow Statement'},{id:'f11',l:'DuPont Analysis'}],
+  'c3':  [{id:'c4',l:'MM Proposition'},{id:'c2',l:'Working Capital & Capital Budgeting'},{id:'c5',l:'Dividends FCFF FCFE'}],
+  'c4':  [{id:'c3',l:'WACC'},{id:'c6',l:'Operating & Financial Leverage'},{id:'p3',l:'Jensen Alpha & Treynor'}],
+  'c5':  [{id:'c3',l:'WACC'},{id:'c4',l:'MM Proposition'},{id:'eq1',l:'Gordon Growth Model'}],
+  'c6':  [{id:'c3',l:'WACC'},{id:'c4',l:'MM Proposition'},{id:'c2',l:'Capital Budgeting'}],
+
+  // FRA
+  'f1':  [{id:'f2',l:'Revenue Recognition'},{id:'f5',l:'Cash Flow Statement'},{id:'f11',l:'DuPont Analysis'}],
+  'f2':  [{id:'f3',l:'EPS Diluted vs Basic'},{id:'f1',l:'Financial Statement Framework'},{id:'f10',l:'Earnings Quality'}],
+  'f3':  [{id:'f2',l:'Revenue Recognition'},{id:'f12',l:'IFRS vs GAAP'},{id:'c5',l:'Dividends FCFF FCFE'}],
+  'f4':  [{id:'f7',l:'Impairment'},{id:'f12',l:'IFRS vs GAAP'},{id:'f2',l:'Revenue Recognition'}],
+  'f5':  [{id:'c5',l:'FCFF & FCFE'},{id:'f11',l:'DuPont Analysis'},{id:'f2',l:'Revenue Recognition'}],
+  'f6':  [{id:'f7',l:'Long-Lived Assets & Depreciation'},{id:'f8',l:'Lease Accounting'},{id:'f12',l:'IFRS vs GAAP'}],
+  'f7':  [{id:'f6',l:'Inventory FIFO LIFO'},{id:'f4',l:'Intangibles & Goodwill'},{id:'f8',l:'Lease Accounting'}],
+  'f8':  [{id:'f7',l:'Depreciation & Impairment'},{id:'f9',l:'Deferred Tax'},{id:'f12',l:'IFRS vs GAAP'}],
+  'f9':  [{id:'f8',l:'Lease Accounting'},{id:'f12',l:'IFRS vs GAAP'},{id:'f7',l:'Long-Lived Assets'}],
+  'f10': [{id:'f11',l:'Ratio Analysis & DuPont'},{id:'f2',l:'Revenue Recognition'},{id:'f5',l:'Cash Flow Statement'}],
+  'f11': [{id:'f10',l:'Reporting Quality'},{id:'c2',l:'Working Capital'},{id:'p3',l:'Performance Measures'}],
+  'f12': [{id:'f6',l:'Inventory FIFO/LIFO'},{id:'f7',l:'Long-Lived Assets'},{id:'f9',l:'Deferred Tax'}],
+
+  // EQUITY
+  'eq1': [{id:'eq2',l:'Justified P/E & Multiples'},{id:'eq3',l:'CAPM & Beta'},{id:'c5',l:'Dividends & SGR'}],
+  'eq2': [{id:'eq1',l:'Gordon Growth Model'},{id:'eq5',l:'P/E P/B EV/EBITDA'},{id:'eq3',l:'CAPM & SML'}],
+  'eq3': [{id:'p3',l:'Jensen Alpha & Treynor'},{id:'p2',l:'Efficient Frontier'},{id:'eq4',l:'CAPM Beta & SML'}],
+  'eq4': [{id:'eq3',l:'CAPM & Beta'},{id:'p3',l:'Systematic Risk & SML'},{id:'p2',l:'Portfolio Math'}],
+  'eq5': [{id:'eq1',l:'Gordon Growth Model'},{id:'eq2',l:'Justified P/E'},{id:'f11',l:'DuPont Analysis'}],
+  'eq6': [{id:'c1',l:'Corporate Governance & ESG'},{id:'eq7',l:'Behavioral Finance'},{id:'a5',l:'Hedge Funds'}],
+  'eq7': [{id:'eq6',l:'ESG Investing'},{id:'p1',l:'Risk Aversion'},{id:'eq3',l:'EMH'}],
+
+  // FIXED INCOME
+  'fi1': [{id:'fi2',l:'Repo Agreements'},{id:'fi3',l:'Bond Pricing & YTM'},{id:'fi4',l:'Yield Measures & Spreads'}],
+  'fi2': [{id:'fi1',l:'Bond Features'},{id:'d1',l:'Forward & Futures'},{id:'d2',l:'Swap Contracts'}],
+  'fi3': [{id:'fi4',l:'Yield Measures & Spreads'},{id:'fi6',l:'Duration & Convexity'},{id:'fi5',l:'Spot & Forward Rates'}],
+  'fi4': [{id:'fi3',l:'Bond Pricing & YTM'},{id:'fi5',l:'Spot & Forward Rates'},{id:'fi8',l:'Credit Risk'}],
+  'fi5': [{id:'fi4',l:'Yield & Spread Measures'},{id:'fi9',l:'Term Structure'},{id:'e2b',l:'Central Bank Policy'}],
+  'fi6': [{id:'fi7',l:'Key Rate Duration'},{id:'fi3',l:'Bond Pricing'},{id:'fi9',l:'MBS & Securitization'}],
+  'fi7': [{id:'fi6',l:'Duration & Convexity'},{id:'fi8',l:'Credit Risk'},{id:'fi4',l:'Yield Spreads'}],
+  'fi8': [{id:'fi4',l:'Yield Measures'},{id:'fi5',l:'Spot & Forward Rates'},{id:'fi9',l:'MBS & Securitization'}],
+  'fi9': [{id:'fi6',l:'Duration & Convexity'},{id:'fi1',l:'Bond Features'},{id:'a3',l:'Real Estate'}],
+
+  // DERIVATIVES
+  'd1':  [{id:'d2',l:'Swap Contracts'},{id:'e5',l:'Forward FX Rates'},{id:'fi5',l:'Spot & Forward Rates'}],
+  'd2':  [{id:'d1',l:'Forward & Futures'},{id:'d3',l:'Options & Put-Call Parity'},{id:'fi4',l:'FRN & Spreads'}],
+  'd3':  [{id:'d4',l:'Option Greeks'},{id:'d1',l:'Forward & Futures'},{id:'d2',l:'Swaps'}],
+  'd4':  [{id:'d3',l:'Options & Put-Call Parity'},{id:'fi6',l:'Duration & Convexity'},{id:'p6',l:'VaR & Risk'}],
+
+  // ALTERNATIVES
+  'a1':  [{id:'a2',l:'Private Equity & PE Waterfall'},{id:'a5',l:'Hedge Fund Strategies'},{id:'p5',l:'GIPS'}],
+  'a2':  [{id:'a1',l:'Alt Investment Structure'},{id:'a3',l:'Real Estate'},{id:'c4',l:'MM Proposition'}],
+  'a3':  [{id:'a2',l:'Private Equity'},{id:'a4',l:'Commodities'},{id:'fi9',l:'MBS & Securitization'}],
+  'a4':  [{id:'a3',l:'Real Estate'},{id:'d1',l:'Forward & Futures'},{id:'a5',l:'Hedge Funds'}],
+  'a5':  [{id:'a1',l:'Alt Investment Structure'},{id:'a2',l:'PE Waterfall'},{id:'p6',l:'Risk Management'}],
+  'a6':  [{id:'q11',l:'Fintech & Big Data'},{id:'a5',l:'Hedge Funds'},{id:'a1',l:'Alt Investments'}],
+
+  // PORTFOLIO MANAGEMENT
+  'p1':  [{id:'p2',l:'Portfolio Math & Efficient Frontier'},{id:'p3',l:'Systematic Risk & SML'},{id:'eq7',l:'Behavioral Finance'}],
+  'p2':  [{id:'p1',l:'Risk Aversion'},{id:'p3',l:'CAPM & SML'},{id:'q3',l:'Downside Deviation & CV'}],
+  'p3':  [{id:'p2',l:'Efficient Frontier'},{id:'p4',l:'Portfolio Management Process'},{id:'eq3',l:'CAPM & Beta'}],
+  'p4':  [{id:'p5',l:'Asset Allocation & Rebalancing'},{id:'p6',l:'VaR & Risk Management'},{id:'p7',l:'GIPS Standards'}],
+  'p5':  [{id:'p4',l:'Portfolio Process & IPS'},{id:'p7',l:'GIPS'},{id:'c2',l:'Working Capital'}],
+  'p6':  [{id:'d4',l:'Option Greeks'},{id:'fi7',l:'Key Rate Duration'},{id:'p4',l:'Portfolio Process'}],
+  'p7':  [{id:'p4',l:'Portfolio Process & IPS'},{id:'p5',l:'Asset Allocation'},{id:'eth4',l:'GIPS & Performance'}],
+
+  // ETHICS
+  'eth1': [{id:'eth2',l:'MNPI & Mosaic Theory'},{id:'eth3',l:'Priority of Transactions'},{id:'eth5',l:'Market Manipulation'}],
+  'eth2': [{id:'eth1',l:'CFA Standards Overview'},{id:'eth3',l:'Conflicts of Interest'},{id:'eth5',l:'Research Standards'}],
+  'eth3': [{id:'eth1',l:'CFA Standards'},{id:'eth2',l:'MNPI'},{id:'eth4',l:'Performance Presentation'}],
+  'eth4': [{id:'p7',l:'GIPS Standards'},{id:'eth3',l:'Priority of Transactions'},{id:'eth5',l:'Market Manipulation'}],
+  'eth5': [{id:'eth1',l:'CFA Standards'},{id:'eth2',l:'MNPI'},{id:'eth4',l:'GIPS & Performance'}],
+};
+
+// Similar concepts panel injected into each card
+const origBuildCard = buildCard;
+
+function buildCard(c){
+  const star=c.star?'<span class="star-badge">★</span>':'';
+  const sc=c.star?' is-star':'';
+  const newBadge=c.src==='schweser'?'<span class="tag tag-blue">Schweser</span>':'';
+  const freqBadge=c.freq?'<span class="tag tag-red">High Freq</span>':'';
+  const tags=c.tags.map(([cl,lb])=>`<span class="tag tag-${cl}">${lb}</span>`).join('');
+
+  const simList = SIMILAR[c.id] || [];
+  const simHtml = simList.length ? `
+    <div class="section-label">Similar / Related Concepts</div>
+    <div class="sim-chips">
+      ${simList.map(s=>`<button class="sim-chip" onclick="jumpTo('${s.id}',event)">${s.l}</button>`).join('')}
+    </div>` : '';
+
+  return `<div class="concept-card${sc}" data-subject="${c.s}" data-star="${c.star}" data-freq="${c.freq}" data-src="${c.src}" data-id="${c.id}" data-r="${c.r}">
+  <div class="card-header" onclick="toggleCard(this)">
+    <div>
+      <div class="name-row">${star}<span class="concept-name">${c.name}</span></div>
+      <div class="concept-sub">${c.sub}</div>
+    </div>
+    <span class="expand-icon">▼</span>
+  </div>
+  <div class="card-body">
+    <div class="section-label">Definition</div>
+    <div class="definition">${c.def.replace(/\n/g,'<br>')}</div>
+    ${c.formula?`<div class="section-label">Formula / Key Concepts</div><div class="formula-box">${c.formula}</div>`:''}
+    <div class="section-label">Example Question</div>
+    <div class="example-box">
+      <div class="example-q">Q. ${c.q}</div>
+      <div class="example-a">A. ${c.a}</div>
+    </div>
+    <div class="tag-row">${newBadge}${freqBadge}${tags}</div>
+    ${simHtml}
+  </div>
+</div>`;
+}
+
+function jumpTo(targetId, e) {
+  if(e) e.stopPropagation();
+  const targetCard = document.querySelector(`[data-id="${targetId}"]`);
+  if(!targetCard) return;
+
+  // show the right subject section
+  const subj = targetCard.dataset.subject;
+  document.querySelectorAll('.subject-section').forEach(s=>s.classList.remove('active'));
+  const sec = document.getElementById('sec-'+subj);
+  if(sec) sec.classList.add('active');
+  document.querySelectorAll('.subject-btn').forEach(b=>b.classList.remove('active'));
+  const btn = document.querySelector(`[onclick*="'${subj}'"]`);
+  if(btn) btn.classList.add('active');
+
+  // reset filters
+  currentSubject = subj;
+  document.querySelectorAll('.concept-card').forEach(c=>c.style.display='');
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  const allBtn = document.querySelector('.filter-btn');
+  if(allBtn) allBtn.classList.add('active');
+  currentFilter = 'all';
+
+  // expand and scroll
+  targetCard.classList.add('expanded');
+  setTimeout(()=>{
+    targetCard.scrollIntoView({behavior:'smooth', block:'center'});
+    targetCard.style.borderColor='var(--star)';
+    setTimeout(()=>targetCard.style.borderColor='',1800);
+  }, 80);
+  updateCounts();
+}
+
+function renderAll(){
+  const subs=['quant','economics','fra','corp','equity','fi','deriv','alt','pm','ethics'];
+  subs.forEach(s=>{
+    document.getElementById('grid-'+s).innerHTML=
+      C.filter(c=>c.s===s).map(buildCard).join('');
+  });
+  updateCounts();
+}
+
+function updateCounts(){
+  const subs=['quant','economics','fra','corp','equity','fi','deriv','alt','pm','ethics'];
+  subs.forEach(s=>{
+    const v=[...document.querySelectorAll(`[data-subject="${s}"]`)].filter(el=>el.style.display!=='none').length;
+    const el=document.getElementById('cnt-'+s);if(el)el.textContent=v;
+  });
+  const total=[...document.querySelectorAll('.concept-card')].filter(el=>el.style.display!=='none').length;
+  const stars=[...document.querySelectorAll('.concept-card[data-star="true"]')].filter(el=>el.style.display!=='none').length;
+  document.getElementById('total-count').textContent=total;
+  document.getElementById('star-count').textContent=stars;
+  const ca=document.getElementById('cnt-all');if(ca)ca.textContent=total;
+}
+
+function showSubject(subject,btn){
+  document.querySelectorAll('.subject-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentSubject=subject;
+  document.querySelectorAll('.subject-section').forEach(s=>s.classList.remove('active'));
+  if(subject==='all'){
+    document.querySelectorAll('.subject-section').forEach(s=>s.classList.add('active'));
+  } else {
+    const t=document.getElementById('sec-'+subject);if(t)t.classList.add('active');
+  }
+  applyFilters();
+}
+
+function setFilter(filter,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter=filter;
+  applyFilters();
+}
+
+function applyFilters(){
+  const q=document.getElementById('search').value.toLowerCase().trim();
+  let found=0;
+  document.querySelectorAll('.concept-card').forEach(card=>{
+    const isStar=card.dataset.star==='true';
+    const isFreq=card.dataset.freq==='true';
+    const src=card.dataset.src;
+    let show=true;
+    if(currentFilter==='star'&&!isStar)show=false;
+    if(currentFilter==='new'&&src!=='schweser')show=false;
+    if(currentFilter==='freq'&&!isFreq)show=false;
+    if(q&&!card.textContent.toLowerCase().includes(q))show=false;
+    card.style.display=show?'':'none';
+    if(show)found++;
+  });
+  document.getElementById('no-results').style.display=found===0?'block':'none';
+  updateCounts();
+}
+
+function toggleCard(header){
+  header.closest('.concept-card').classList.toggle('expanded');
+}
+
+document.getElementById('search').addEventListener('input',applyFilters);
+document.addEventListener('keydown',e=>{
+  if(e.key==='/'&&document.activeElement!==document.getElementById('search')){
+    e.preventDefault();document.getElementById('search').focus();
+  }
+});
+
+renderAll();
+</script>
+
+<!-- PWA BOTTOM NAV -->
+<style>
+.pwa-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(15,14,12,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid #2e2b26;display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:200;}
+.pwa-nav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.65rem .4rem;color:#6b6358;text-decoration:none;font-size:.58rem;font-family:'DM Mono',monospace;gap:.25rem;-webkit-tap-highlight-color:transparent;}
+.pwa-nav a.active{color:#c9a84c;}
+.pwa-nav a:active{color:#e8c97a;}
+.pwa-nav .ni{font-size:1.15rem;}
+.pwa-nav-spacer{height:calc(62px + env(safe-area-inset-bottom,0px));}
+</style>
+<div class="pwa-nav-spacer"></div>
+<nav class="pwa-nav">
+  <a href="index.html"><span class="ni">🏠</span>Home</a>
+  <a href="guide.html" class="active"><span class="ni">📖</span>Guide</a>
+  <a href="exam.html"><span class="ni">📝</span>Exams</a>
+  <a href="exam.html#testbank"><span class="ni">🏦</span>Test Bank</a>
+</nav>
+<script>
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+// Track viewed concepts for home progress
+document.querySelectorAll('.concept-card').forEach(c=>{
+  c.addEventListener('click',()=>{
+    const v=parseInt(localStorage.getItem('concepts-viewed')||0);
+    const seen=JSON.parse(localStorage.getItem('seen-concepts')||'[]');
+    if(!seen.includes(c.dataset.id)){seen.push(c.dataset.id);localStorage.setItem('seen-concepts',JSON.stringify(seen));localStorage.setItem('concepts-viewed',seen.length);}
+  });
+});
+// Handle #hash navigation from home screen
+if(location.hash){
+  const target=document.getElementById('sec-'+location.hash.slice(1));
+  if(target){target.classList.add('active');setTimeout(()=>target.scrollIntoView({behavior:'smooth'}),300);}
+}
+</script>
+
+</body>
+</html>

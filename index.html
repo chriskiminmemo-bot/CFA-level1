@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CFA L1">
+<meta name="theme-color" content="#0f0e0c">
+<title>CFA Level I — 2025</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --bg2: #181714;
+    --bg3: #211f1b;
+    --accent: #c9a84c;
+    --accent2: #e8c97a;
+    --text: #e8e4dc;
+    --text2: #a09890;
+    --text3: #6b6358;
+    --border: #2e2b26;
+    --green: #7ab87a;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100dvh;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+    overflow-x: hidden;
+  }
+
+  /* STATUS BAR AREA */
+  .status-bar {
+    height: calc(var(--safe-top) + 0px);
+    background: var(--bg);
+  }
+
+  /* HEADER */
+  header {
+    padding: 2rem 1.5rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .header-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .header-title span { color: var(--accent); }
+  .header-sub {
+    font-size: 0.78rem;
+    color: var(--text3);
+    margin-top: 0.4rem;
+  }
+
+  /* PROGRESS STRIP */
+  .progress-strip {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0.9rem 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+  }
+  .prog-item { flex: 1; }
+  .prog-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .prog-bar-wrap { background: var(--border); border-radius: 2px; height: 3px; margin-bottom: 0.3rem; }
+  .prog-bar { height: 3px; background: var(--accent); border-radius: 2px; transition: width 0.8s ease; }
+  .prog-val { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--accent2); }
+
+  /* MAIN CARDS */
+  main { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+
+  .app-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+    transition: transform 0.15s, border-color 0.15s;
+    -webkit-touch-callout: none;
+  }
+  .app-card:active { transform: scale(0.98); border-color: var(--accent); }
+
+  .card-top {
+    padding: 1.4rem 1.5rem 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .card-icon {
+    width: 48px; height: 48px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  .card-icon.gold { background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.25); }
+  .card-icon.blue { background: rgba(122,176,200,0.12); border: 1px solid rgba(122,176,200,0.22); }
+  .card-icon.green { background: rgba(122,184,122,0.12); border: 1px solid rgba(122,184,122,0.22); }
+
+  .card-text { flex: 1; }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--accent2);
+    margin-bottom: 0.3rem;
+  }
+  .card-desc { font-size: 0.78rem; color: var(--text2); line-height: 1.6; }
+
+  .card-meta {
+    padding: 0.7rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 1rem;
+    background: rgba(0,0,0,0.15);
+  }
+  .meta-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .meta-chip::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); opacity: 0.6; }
+
+  .card-arrow {
+    font-size: 1rem;
+    color: var(--text3);
+    margin-top: 0.1rem;
+  }
+
+  /* TOPIC GRID */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    padding-left: 0.2rem;
+  }
+
+  .topic-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .topic-chip {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 0.8rem;
+    font-size: 0.72rem;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .topic-chip:active { border-color: var(--accent); background: var(--bg3); }
+  .topic-chip-name { font-weight: 400; }
+  .topic-chip-count { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--text3); }
+
+  /* INSTALL BANNER */
+  .install-banner {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+  }
+  .install-banner.hidden { display: none; }
+  .install-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .install-text { flex: 1; }
+  .install-title { font-size: 0.82rem; color: var(--accent2); font-weight: 500; margin-bottom: 0.15rem; }
+  .install-sub { font-size: 0.7rem; color: var(--text3); line-height: 1.5; }
+  .install-close { color: var(--text3); font-size: 1rem; padding: 0.2rem; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    background: rgba(15,14,12,0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: var(--safe-bottom);
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 0.5rem;
+    color: var(--text3);
+    text-decoration: none;
+    font-size: 0.6rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+    gap: 0.3rem;
+    transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-item.active { color: var(--accent); }
+  .nav-item:active { color: var(--accent2); }
+  .nav-icon { font-size: 1.2rem; }
+
+  /* SPACER for bottom nav */
+  .nav-spacer { height: calc(70px + var(--safe-bottom)); }
+
+  /* STREAK */
+  .streak-row {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+  .streak-day {
+    flex: 1;
+    height: 32px;
+    border-radius: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--text3);
+    flex-direction: column;
+    gap: 2px;
+  }
+  .streak-day.done { background: rgba(201,168,76,0.15); border-color: rgba(201,168,76,0.3); color: var(--accent); }
+  .streak-day.today { border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">Schweser 2025 · All 10 Topics</div>
+  <h1 class="header-title">CFA <span>Level I</span></h1>
+  <p class="header-sub">Concept Guide · Mock Exams · Test Bank</p>
+</header>
+
+<div class="progress-strip">
+  <div class="prog-item">
+    <div class="prog-label">Study Progress</div>
+    <div class="prog-bar-wrap"><div class="prog-bar" id="study-bar" style="width:0%"></div></div>
+    <div class="prog-val" id="study-val">0 / 76 concepts</div>
+  </div>
+  <div class="prog-item">
+    <div class="prog-label">Exam Score</div>
+    <div class="prog-bar-wrap"><div class="prog-bar" id="exam-bar" style="width:0%"></div></div>
+    <div class="prog-val" id="exam-val">No exams yet</div>
+  </div>
+</div>
+
+<main>
+
+  <!-- INSTALL BANNER -->
+  <div class="install-banner" id="install-banner">
+    <div class="install-icon">📲</div>
+    <div class="install-text">
+      <div class="install-title">Install as App</div>
+      <div class="install-sub">Tap <strong>Share →</strong> then <strong>"Add to Home Screen"</strong> for offline access</div>
+    </div>
+    <div class="install-close" onclick="dismissBanner()">✕</div>
+  </div>
+
+  <!-- MAIN APP CARDS -->
+  <a class="app-card" href="guide.html">
+    <div class="card-top">
+      <div class="card-icon gold">📖</div>
+      <div class="card-text">
+        <div class="card-title">Concept Guide</div>
+        <div class="card-desc">76 key concepts from all 4 Schweser books. Similar concept links, formulas, and worked examples.</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </div>
+    <div class="card-meta">
+      <span class="meta-chip">76 concepts</span>
+      <span class="meta-chip">10 subjects</span>
+      <span class="meta-chip">Similar concept links</span>
+    </div>
+  </a>
+
+  <a class="app-card" href="exam.html">
+    <div class="card-top">
+      <div class="card-icon blue">📝</div>
+      <div class="card-text">
+        <div class="card-title">Mock Exams</div>
+        <div class="card-desc">5 sets × 180 questions. Official topic weights. 4h30m timed sessions with full review.</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </div>
+    <div class="card-meta">
+      <span class="meta-chip">5 exams</span>
+      <span class="meta-chip">180 Q each</span>
+      <span class="meta-chip">Official weights</span>
+    </div>
+  </a>
+
+  <a class="app-card" href="exam.html#testbank">
+    <div class="card-top">
+      <div class="card-icon green">🏦</div>
+      <div class="card-text">
+        <div class="card-title">Test Bank</div>
+        <div class="card-desc">228 unique questions. Filter by topic, drill weak areas, instant explanations.</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </div>
+    <div class="card-meta">
+      <span class="meta-chip">228 questions</span>
+      <span class="meta-chip">Topic filters</span>
+      <span class="meta-chip">Instant feedback</span>
+    </div>
+  </a>
+
+  <!-- STUDY STREAK -->
+  <div>
+    <div class="section-label">This Week</div>
+    <div class="streak-row" id="streak-row"></div>
+  </div>
+
+  <!-- QUICK TOPIC ACCESS -->
+  <div>
+    <div class="section-label">Jump to Topic</div>
+    <div class="topic-grid">
+      <a class="topic-chip" href="guide.html#sec-quant"><span class="topic-chip-name">Quantitative Methods</span><span class="topic-chip-count">R1–R11</span></a>
+      <a class="topic-chip" href="guide.html#sec-economics"><span class="topic-chip-name">Economics</span><span class="topic-chip-count">R12–R19</span></a>
+      <a class="topic-chip" href="guide.html#sec-fra"><span class="topic-chip-name">Financial Reporting</span><span class="topic-chip-count">R27–R38</span></a>
+      <a class="topic-chip" href="guide.html#sec-corp"><span class="topic-chip-name">Corporate Finance</span><span class="topic-chip-count">R20–R26</span></a>
+      <a class="topic-chip" href="guide.html#sec-equity"><span class="topic-chip-name">Equity</span><span class="topic-chip-count">R39–R46</span></a>
+      <a class="topic-chip" href="guide.html#sec-fi"><span class="topic-chip-name">Fixed Income</span><span class="topic-chip-count">R47–R62</span></a>
+      <a class="topic-chip" href="guide.html#sec-deriv"><span class="topic-chip-name">Derivatives</span><span class="topic-chip-count">R63–R75</span></a>
+      <a class="topic-chip" href="guide.html#sec-alt"><span class="topic-chip-name">Alternatives</span><span class="topic-chip-count">R76–R82</span></a>
+      <a class="topic-chip" href="guide.html#sec-pm"><span class="topic-chip-name">Portfolio Mgmt</span><span class="topic-chip-count">R83–R88</span></a>
+      <a class="topic-chip" href="guide.html#sec-ethics"><span class="topic-chip-name">Ethics</span><span class="topic-chip-count">R89–R96</span></a>
+    </div>
+  </div>
+
+  <div class="nav-spacer"></div>
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a class="nav-item active" href="index.html">
+    <span class="nav-icon">🏠</span>
+    <span>Home</span>
+  </a>
+  <a class="nav-item" href="guide.html">
+    <span class="nav-icon">📖</span>
+    <span>Guide</span>
+  </a>
+  <a class="nav-item" href="exam.html">
+    <span class="nav-icon">📝</span>
+    <span>Exams</span>
+  </a>
+  <a class="nav-item" href="exam.html#testbank">
+    <span class="nav-icon">🏦</span>
+    <span>Test Bank</span>
+  </a>
+</nav>
+
+<script>
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// Install banner — hide if already installed or dismissed
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+const dismissed = localStorage.getItem('banner-dismissed');
+if (isStandalone || dismissed) {
+  document.getElementById('install-banner').classList.add('hidden');
+}
+
+function dismissBanner() {
+  localStorage.setItem('banner-dismissed', '1');
+  document.getElementById('install-banner').classList.add('hidden');
+}
+
+// Study streak (stored in localStorage)
+function renderStreak() {
+  const days = ['M','T','W','T','F','S','S'];
+  const today = new Date().getDay(); // 0=Sun
+  const streak = JSON.parse(localStorage.getItem('streak') || '[]');
+  const row = document.getElementById('streak-row');
+  const todayIdx = today === 0 ? 6 : today - 1;
+
+  row.innerHTML = days.map((d, i) => {
+    const done = streak.includes(i);
+    const isToday = i === todayIdx;
+    let cls = 'streak-day';
+    if (done) cls += ' done';
+    if (isToday) cls += ' today';
+    return `<div class="${cls}" onclick="toggleStreak(${i})">${d}${done ? '<br>✓' : ''}</div>`;
+  }).join('');
+}
+
+function toggleStreak(i) {
+  const streak = JSON.parse(localStorage.getItem('streak') || '[]');
+  const idx = streak.indexOf(i);
+  if (idx === -1) streak.push(i); else streak.splice(idx, 1);
+  localStorage.setItem('streak', JSON.stringify(streak));
+  renderStreak();
+}
+
+renderStreak();
+
+// Load progress from localStorage (set by guide.html and exam.html)
+const conceptsDone = parseInt(localStorage.getItem('concepts-viewed') || 0);
+const lastScore = localStorage.getItem('last-exam-score');
+
+const studyPct = Math.min(100, Math.round(conceptsDone / 76 * 100));
+document.getElementById('study-bar').style.width = studyPct + '%';
+document.getElementById('study-val').textContent = conceptsDone + ' / 76 concepts';
+
+if (lastScore) {
+  document.getElementById('exam-bar').style.width = lastScore + '%';
+  document.getElementById('exam-val').textContent = lastScore + '% last exam';
+}
+</script>
+</body>
+</html>
