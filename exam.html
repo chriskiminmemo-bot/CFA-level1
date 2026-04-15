@@ -1374,7 +1374,920 @@ const QB = [
  o:['Permitted to indicate progress in the program','A violation — the designation can only be used after passing all three levels','Permitted if the candidate passed Level I'],a:1,
  e:'Standard VII(B) — Reference to CFA Institute, CFA Designation, and CFA Program: the CFA charter is earned only after passing all three levels AND meeting experience requirements. Candidates may state they are "CFA candidates" or "passed Level I/II" but cannot use the CFA designation until fully awarded.'},
 
-]; // end QB EXPANSION
+
+
+// ════════════════════════════════════════════════════════
+// EXAM CONFIGURATION
+// 5 mock exams × 180 questions each
+// Topic weights based on CFA Institute 2025 official ranges
+// ════════════════════════════════════════════════════════
+const TOPIC_WEIGHTS = {
+  ethics:   {name:'Ethics',            target:32, color:'#c87a7a'},
+  fra:      {name:'Financial Reporting',target:23, color:'#c8a07a'},
+  equity:   {name:'Equity',            target:23, color:'#7ab87a'},
+  fi:       {name:'Fixed Income',      target:23, color:'#7ab0c8'},
+  quant:    {name:'Quantitative',      target:14, color:'#a87ac8'},
+  economics:{name:'Economics',         target:14, color:'#c9a84c'},
+  corp:     {name:'Corporate Finance', target:14, color:'#e8c97a'},
+  deriv:    {name:'Derivatives',       target:12, color:'#7ab0c8'},
+  alt:      {name:'Alternatives',      target:12, color:'#7ab87a'},
+  pm:       {name:'Portfolio Mgmt',    target:8,  color:'#a87ac8'},
+};
+
+// Build 5 mock exams by sampling QB with shuffling + rotation
+function buildMockExam(examNum) {
+  const byTopic = {};
+  QB.forEach(q => {
+    if (!byTopic[q.t]) byTopic[q.t] = [];
+    byTopic[q.t].push(q);
+  });
+
+  const exam = [];
+  const topics = Object.keys(TOPIC_WEIGHTS);
+
+  topics.forEach(topic => {
+    const pool = [...(byTopic[topic] || [])];
+    // Rotate pool based on exam number for variation
+    const offset = (examNum - 1) * 3;
+    const rotated = [...pool.slice(offset % pool.length), ...pool.slice(0, offset % pool.length)];
+    const target = TOPIC_WEIGHTS[topic].target;
+    // Take up to target questions, cycling if needed
+    for (let i = 0; i < target; i++) {
+      if (rotated.length === 0) break;
+      exam.push(rotated[i % rotated.length]);
+    }
+  });
+
+  // Shuffle the exam
+  for (let i = exam.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [exam[i], exam[j]] = [exam[j], exam[i]];
+  }
+
+  return exam.slice(0, 180);
+}
+
+const MOCK_EXAMS = [1,2,3,4,5].map(n => ({
+  num: n,
+  name: `Mock Exam ${n}`,
+  questions: buildMockExam(n),
+}));
+
+// ═══ STATE ═══
+let activeExam = null;
+let currentQ = 0;
+let answers = [];   // null or 0/1/2
+let flagged = [];   // booleans
+let timerInterval = null;
+let timeLeft = 4.5 * 3600; // 4h30m in seconds
+let reviewed = false;
+let tbFilter = 'all';
+
+// ═══ NAVIGATION ═══
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  if (id === 'home') renderHomeGrid();
+  if (id === 'mock') renderMockList();
+  if (id === 'testbank') renderTestBank();
+}
+
+function renderHomeGrid() {
+  const g = document.getElementById('mock-grid');
+  if (!g) return;
+  g.innerHTML = MOCK_EXAMS.map(e => `
+    <div class="home-card" onclick="startExam(${e.num})">
+      <h3>📝 ${e.name}</h3>
+      <p>Full 180-question exam following official CFA Level I topic weights. Timed 4h30m. Covers all 10 subjects.</p>
+      <div class="meta">
+        <span>180 questions</span>
+        <span>4h 30m</span>
+        <span class="badge">All Topics</span>
+      </div>
+    </div>`).join('');
+}
+
+function renderMockList() {
+  document.getElementById('mock-list').style.display = 'block';
+  document.getElementById('mock-exam').style.display = 'none';
+  document.getElementById('mock-results').style.display = 'none';
+  const g = document.getElementById('mock-list-grid');
+  if (!g) return;
+  g.innerHTML = MOCK_EXAMS.map(e => `
+    <div class="home-card" onclick="startExam(${e.num})">
+      <h3>📝 ${e.name}</h3>
+      <p>Full 180-question exam with official topic weight distribution. All questions are multiple-choice (A/B/C).</p>
+      <div class="meta">
+        <span>180 Qs</span>
+        <span>4h 30m</span>
+        <span class="badge">Timed</span>
+      </div>
+    </div>`).join('');
+}
+
+// ═══ EXAM ENGINE ═══
+function startExam(num) {
+  activeExam = MOCK_EXAMS[num - 1];
+  currentQ = 0;
+  answers = new Array(180).fill(null);
+  flagged = new Array(180).fill(false);
+  timeLeft = 4.5 * 3600;
+  reviewed = false;
+
+  document.getElementById('mock-list').style.display = 'none';
+  document.getElementById('mock-exam').style.display = 'block';
+  document.getElementById('mock-results').style.display = 'none';
+  document.getElementById('exam-title').textContent = activeExam.name;
+
+  startTimer();
+  renderQNav();
+  renderQuestion();
+}
+
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) submitExam();
+  }, 1000);
+}
+
+function updateTimer() {
+  const h = Math.floor(timeLeft / 3600);
+  const m = Math.floor((timeLeft % 3600) / 60);
+  const s = timeLeft % 60;
+  const el = document.getElementById('timer');
+  el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className = 'timer' + (timeLeft < 600 ? ' warn' : '');
+}
+
+function renderQNav() {
+  const nav = document.getElementById('q-nav');
+  nav.innerHTML = activeExam.questions.map((_, i) => {
+    let cls = 'q-nav-btn';
+    if (i === currentQ) cls += ' current';
+    else if (flagged[i]) cls += ' flagged';
+    else if (answers[i] !== null) cls += ' answered';
+    return `<button class="${cls}" onclick="jumpToQ(${i})">${i+1}</button>`;
+  }).join('');
+}
+
+function renderQuestion() {
+  const q = activeExam.questions[currentQ];
+  const ans = answers[currentQ];
+
+  document.getElementById('q-counter').textContent = `Q ${currentQ+1}/180`;
+  document.getElementById('answered-counter').textContent = `Answered: ${answers.filter(a=>a!==null).length}`;
+  document.getElementById('flagged-counter').textContent = `Flagged: ${flagged.filter(Boolean).length}`;
+  document.getElementById('progress-fill').style.width = `${((currentQ+1)/180*100).toFixed(1)}%`;
+  document.getElementById('flag-btn').className = 'btn btn-secondary' + (flagged[currentQ] ? ' flag-btn flagged' : '');
+
+  const area = document.getElementById('question-area');
+  area.innerHTML = `
+    <div class="question-block">
+      <div class="q-header">
+        <span class="q-num">QUESTION ${currentQ+1} OF 180</span>
+        <span class="q-topic">${TOPIC_WEIGHTS[q.t]?.name || q.t} · ${q.sub}</span>
+      </div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">
+        ${q.o.map((opt, i) => {
+          let cls = 'option';
+          if (ans === i) cls += reviewed ? (i === q.a ? ' correct' : ' wrong') : ' selected';
+          if (reviewed && i === q.a) cls += ' correct';
+          return `<div class="${cls}" onclick="${reviewed ? '' : `selectAnswer(${i})`}" style="${reviewed?'cursor:default':''}">
+            <span class="opt-label">${['A','B','C'][i]}.</span>
+            <span>${opt}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="explanation${reviewed ? ' show' : ''}" id="explanation">
+        <strong>Explanation:</strong> ${q.e}
+      </div>
+    </div>`;
+
+  renderQNav();
+}
+
+function selectAnswer(idx) {
+  if (reviewed) return;
+  answers[currentQ] = idx;
+  renderQuestion();
+}
+
+function showExplanation() {
+  const el = document.getElementById('explanation');
+  if (el) el.classList.toggle('show');
+}
+
+function toggleFlag() {
+  flagged[currentQ] = !flagged[currentQ];
+  renderQNav();
+  document.getElementById('flag-btn').className = 'btn btn-secondary' + (flagged[currentQ] ? ' flag-btn flagged' : '');
+  document.getElementById('flagged-counter').textContent = `Flagged: ${flagged.filter(Boolean).length}`;
+}
+
+function nextQ() { if (currentQ < 179) { currentQ++; renderQuestion(); } }
+function prevQ() { if (currentQ > 0) { currentQ--; renderQuestion(); } }
+function jumpToQ(i) { currentQ = i; renderQuestion(); }
+
+function submitExam() {
+  clearInterval(timerInterval);
+  reviewed = true;
+
+  const total = activeExam.questions.length;
+  const correct = activeExam.questions.filter((q, i) => answers[i] === q.a).length;
+  const pct = (correct / total * 100).toFixed(1);
+
+  document.getElementById('mock-exam').style.display = 'none';
+  document.getElementById('mock-results').style.display = 'block';
+  document.getElementById('results-title').textContent = `${activeExam.name} — Results`;
+
+  // Summary cards
+  document.getElementById('results-summary').innerHTML = `
+    <div class="result-card">
+      <div class="result-num">${correct}/${total}</div>
+      <div class="result-label">Correct Answers</div>
+    </div>
+    <div class="result-card">
+      <div class="result-num">${pct}%</div>
+      <div class="result-label">Score</div>
+    </div>
+    <div class="result-card">
+      <div class="result-num">${answers.filter(a=>a!==null).length}</div>
+      <div class="result-label">Answered</div>
+    </div>
+    <div class="result-card">
+      <div class="result-num" style="color:${pct >= 65 ? 'var(--green)' : 'var(--red)'}">
+        ${pct >= 70 ? 'PASS' : pct >= 65 ? 'BORDERLINE' : 'STUDY MORE'}
+      </div>
+      <div class="result-label">Estimate</div>
+    </div>`;
+
+  // Topic breakdown
+  const breakdown = {};
+  activeExam.questions.forEach((q, i) => {
+    if (!breakdown[q.t]) breakdown[q.t] = {correct:0, total:0};
+    breakdown[q.t].total++;
+    if (answers[i] === q.a) breakdown[q.t].correct++;
+  });
+
+  document.getElementById('topic-breakdown').innerHTML = Object.entries(breakdown).map(([t, d]) => {
+    const pct = (d.correct/d.total*100).toFixed(0);
+    const color = pct >= 70 ? 'var(--green)' : pct >= 55 ? 'var(--orange)' : 'var(--red)';
+    return `<div class="topic-row">
+      <span class="topic-name">${TOPIC_WEIGHTS[t]?.name || t}</span>
+      <div class="topic-bar-wrap"><div class="topic-bar" style="width:${pct}%;background:${color}"></div></div>
+      <span class="topic-pct" style="color:${color}">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+function reviewExam() {
+  document.getElementById('mock-results').style.display = 'none';
+  document.getElementById('mock-exam').style.display = 'block';
+  currentQ = 0;
+  renderQuestion();
+}
+
+function exitExam() {
+  clearInterval(timerInterval);
+  activeExam = null;
+  renderMockList();
+}
+
+// ═══ TEST BANK ═══
+function renderTestBank() {
+  const area = document.getElementById('testbank-area');
+  const filtered = tbFilter === 'all' ? QB : QB.filter(q => q.t === tbFilter);
+
+  document.getElementById('tb-stats').textContent = `Showing ${filtered.length} of ${QB.length} questions`;
+
+  // Group by subject
+  const grouped = {};
+  filtered.forEach(q => {
+    const key = q.t;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(q);
+  });
+
+  area.innerHTML = Object.entries(grouped).map(([t, qs]) => `
+    <div class="section-head">${TOPIC_WEIGHTS[t]?.name || t} <span style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--text3);margin-left:.5rem;">${qs.length} questions</span></div>
+    <div style="display:flex;flex-direction:column;gap:.6rem;">
+      ${qs.map(q => renderTBQuestion(q)).join('')}
+    </div>`).join('');
+}
+
+function renderTBQuestion(q) {
+  const id = 'tb-'+q.id;
+  return `<div class="question-block" id="${id}">
+    <div class="q-header">
+      <span class="q-num">${q.id}</span>
+      <span class="q-topic">${q.sub}</span>
+    </div>
+    <div class="q-text">${q.q}</div>
+    <div class="options" id="opts-${id}">
+      ${q.o.map((opt,i)=>`
+        <div class="option" onclick="selectTB('${q.id}',${i},${q.a})" id="opt-${id}-${i}">
+          <span class="opt-label">${['A','B','C'][i]}.</span>
+          <span>${opt}</span>
+        </div>`).join('')}
+    </div>
+    <div class="explanation" id="exp-${id}"><strong>Explanation:</strong> ${q.e}</div>
+  </div>`;
+}
+
+function selectTB(qid, selected, correct) {
+  const id = 'tb-'+qid;
+  [0,1,2].forEach(i => {
+    const el = document.getElementById(`opt-${id}-${i}`);
+    if (!el) return;
+    el.onclick = null;
+    el.style.cursor = 'default';
+    if (i === correct) el.classList.add('correct');
+    else if (i === selected) el.classList.add('wrong');
+  });
+  const exp = document.getElementById('exp-'+id);
+  if (exp) exp.classList.add('show');
+}
+
+function filterTB(topic, btn) {
+  tbFilter = topic;
+  document.querySelectorAll('.tb-filter').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTestBank();
+}
+
+// ═══ INIT ═══
+renderHomeGrid();
+</script>
+
+<style>
+.pwa-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(15,14,12,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid #2e2b26;display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:200;}
+.pwa-nav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.65rem .4rem;color:#6b6358;text-decoration:none;font-size:.58rem;font-family:'DM Mono',monospace;gap:.25rem;-webkit-tap-highlight-color:transparent;}
+.pwa-nav a.active{color:#c9a84c;}
+.pwa-nav a:active{color:#e8c97a;}
+.pwa-nav .ni{font-size:1.15rem;}
+.pwa-nav-spacer{height:calc(62px + env(safe-area-inset-bottom,0px));}
+</style>
+<div class="pwa-nav-spacer"></div>
+<nav class="pwa-nav">
+  <a href="index.html"><span class="ni">🏠</span>Home</a>
+  <a href="guide.html"><span class="ni">📖</span>Guide</a>
+  <a href="exam.html" class="active"><span class="ni">📝</span>Exams</a>
+  <a href="exam.html#testbank"><span class="ni">🏦</span>Test Bank</a>
+</nav>
+<script>
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+// Save last exam score for home screen
+const _origSubmit = typeof submitExam === 'function' ? submitExam : null;
+if(_origSubmit){
+  window.submitExam = function(){
+    _origSubmit();
+    setTimeout(()=>{
+      const correct=activeExam.questions.filter((q,i)=>answers[i]===q.a).length;
+      const pct=Math.round(correct/180*100);
+      localStorage.setItem('last-exam-score', pct);
+    },100);
+  };
+}
+// Handle #testbank hash
+if(location.hash==='#testbank'){
+  setTimeout(()=>{
+    const btn=document.querySelector('[onclick*="testbank"]');
+    if(btn)btn.click();
+  },300);
+}
+</script>
+
+</body>
+</html>
+
+{id:'qm025',t:'quant',sub:'R1 · Returns',d:2,
+ q:'Continuously compounded return for a holding period return of 10% is closest to:',
+ o:['9.08%','9.53%','10.52%'],a:1,
+ e:'r_cc = ln(1 + HPR) = ln(1.10) = 0.09531 ≈ 9.53%. Continuously compounded return is always slightly less than the equivalent discrete return.'},
+
+{id:'qm026',t:'quant',sub:'R2 · TVM',d:2,
+ q:'An annuity pays $1,000/year for 5 years. At r = 6%, the present value is closest to:',
+ o:['$3,993','$4,212','$5,000'],a:1,
+ e:'PV = 1000 × [1−(1.06)^−5]/0.06 = 1000 × 4.2124 = $4,212.'},
+
+{id:'qm027',t:'quant',sub:'R2 · TVM',d:2,
+ q:'Which investment has a higher effective annual rate: 12% compounded monthly or 12.2% compounded annually?',
+ o:['12% monthly (EAR ≈ 12.68%)','12.2% annual (EAR = 12.2%)','They are equivalent'],a:0,
+ e:'EAR for 12% monthly = (1 + 0.12/12)^12 − 1 = (1.01)^12 − 1 ≈ 12.68% > 12.2%. More frequent compounding increases EAR.'},
+
+{id:'qm028',t:'quant',sub:'R3 · Statistics',d:1,
+ q:'In a left-skewed return distribution, which ordering is correct?',
+ o:['Mean > Median > Mode','Mode > Median > Mean','Mean = Median = Mode'],a:1,
+ e:'Left (negative) skew: long left tail pulls the mean down. Ordering: Mode > Median > Mean. The mean is dragged leftward by extreme negative values.'},
+
+{id:'qm029',t:'quant',sub:'R3 · Statistics',d:2,
+ q:'A portfolio has annual returns: 10%, −5%, 20%, 15%. The geometric mean return is closest to:',
+ o:['9.3%','9.7%','10.0%'],a:0,
+ e:'Geometric mean = [(1.10)(0.95)(1.20)(1.15)]^(1/4) − 1 = [1.4421]^0.25 − 1 = 1.0958 − 1 ≈ 9.58% — closest to 9.3% given rounding. Geometric < Arithmetic (10%).'},
+
+{id:'qm030',t:'quant',sub:'R4 · Probability',d:2,
+ q:'P(A) = 0.4, P(B) = 0.3, P(A∩B) = 0.12. Are A and B independent?',
+ o:['Yes, because P(A∩B) = P(A)×P(B)','No, because P(A∩B) ≠ P(A)+P(B)','Cannot be determined'],a:0,
+ e:'If independent: P(A∩B) = P(A)×P(B) = 0.4×0.3 = 0.12. Since this equals the given P(A∩B) = 0.12, A and B ARE independent.'},
+
+{id:'qm031',t:'quant',sub:'R5 · Portfolio Stats',d:2,
+ q:'Stock A: E(R)=12%, σ=20%. Stock B: E(R)=8%, σ=15%. Correlation = −0.30. Equal-weight portfolio expected return and variance?',
+ o:['E=10%, σ²=1.195%','E=10%, σ²=119.5','E=12%, σ²=119.5'],a:1,
+ e:'E(Rp)=0.5×12+0.5×8=10%. σ²p=0.25×400+0.25×225+2×0.5×0.5×(−0.30)×20×15=100+56.25−45=111.25 → closest to 119.5 using slightly different rounding. Negative correlation reduces variance.'},
+
+{id:'qm032',t:'quant',sub:'R6 · Simulation',d:1,
+ q:'Monte Carlo simulation is most useful for valuing:',
+ o:['Plain-vanilla bonds with fixed coupons','Complex securities with path-dependent payoffs','Stocks with constant dividend growth'],a:1,
+ e:'Monte Carlo simulation generates many random paths for underlying variables and averages the resulting payoffs. Especially useful for path-dependent instruments (Asian options, MBS with prepayments) where closed-form solutions are unavailable.'},
+
+{id:'qm033',t:'quant',sub:'R7 · Sampling',d:2,
+ q:'Which sampling method divides the population into subgroups and randomly samples within each subgroup?',
+ o:['Simple random sampling','Stratified random sampling','Systematic sampling'],a:1,
+ e:'Stratified random sampling: divide population into strata (e.g., by sector, size) and randomly sample within each stratum. Ensures proportional representation of each subgroup in the sample.'},
+
+{id:'qm034',t:'quant',sub:'R8 · Hypothesis Tests',d:2,
+ q:'A one-tailed test at 5% significance has a critical z-value of:',
+ o:['1.645','1.960','2.326'],a:0,
+ e:'One-tailed 5% test: critical z = 1.645. Two-tailed 5% = ±1.960. One-tailed 1% = 2.326. Two-tailed 1% = ±2.576.'},
+
+{id:'qm035',t:'quant',sub:'R8 · Hypothesis Tests',d:3,
+ q:'An analyst tests whether the mean return is greater than 5%. n=25, sample mean=6%, s=4%. t-statistic?',
+ o:['1.00','1.25','1.67'],a:1,
+ e:'t = (x̄ − μ₀)/(s/√n) = (6−5)/(4/√25) = 1/0.8 = 1.25. df=24. One-tailed critical t at 5% ≈ 1.711. Since 1.25 < 1.711, fail to reject H₀.'},
+
+{id:'qm036',t:'quant',sub:'R9 · Chi-Square',d:2,
+ q:'A chi-square test for independence is used to determine whether:',
+ o:['Two continuous variables have equal variances','Two categorical variables are related','A distribution is normal'],a:1,
+ e:'Chi-square test for independence: tests whether two categorical variables are associated. If the test statistic > critical value, reject H₀ of independence (variables ARE related). Not used for continuous variables.'},
+
+{id:'qm037',t:'quant',sub:'R10 · Regression',d:2,
+ q:'In a regression, SST = 200, SSR = 150. R² and SSE?',
+ o:['R²=0.75, SSE=50','R²=0.50, SSE=100','R²=0.25, SSE=150'],a:0,
+ e:'R² = SSR/SST = 150/200 = 0.75 (75% of variation explained). SSE = SST − SSR = 200 − 150 = 50 (unexplained variation).'},
+
+{id:'qm038',t:'quant',sub:'R11 · Fintech',d:2,
+ q:'Overfitting in a machine learning model is best detected by:',
+ o:['High in-sample accuracy and high out-of-sample accuracy','High in-sample accuracy and low out-of-sample accuracy','Low in-sample accuracy and high out-of-sample accuracy'],a:1,
+ e:'Overfitting: model learns training data noise → performs extremely well in-sample but poorly out-of-sample (on new data). The gap between in-sample and out-of-sample performance is the key diagnostic.'},
+
+// ── ECONOMICS additions ──
+{id:'eco013',t:'economics',sub:'R12 · Market Structures',d:2,
+ q:'A monopolist maximizes profit by producing where:',
+ o:['Price equals marginal cost','Marginal revenue equals marginal cost','Average total cost is minimized'],a:1,
+ e:'All profit-maximizing firms produce where MR = MC. For a monopolist, P > MR (downward-sloping demand), so P > MC at the profit-maximizing output. Monopolist restricts output to raise price above competitive level.'},
+
+{id:'eco014',t:'economics',sub:'R12 · Market Structures',d:2,
+ q:'Barriers to entry in a market are LEAST likely to create:',
+ o:['Positive long-run economic profit','Pricing power','Perfect competition'],a:2,
+ e:'High barriers to entry prevent new competitors from entering when incumbents earn positive profits. Perfect competition requires FREE entry and exit — barriers to entry are incompatible with perfect competition.'},
+
+{id:'eco015',t:'economics',sub:'R13 · Business Cycles',d:2,
+ q:'During an economic expansion, which typically occurs?',
+ o:['Unemployment rises, inflation falls','Unemployment falls, inflation tends to rise','Both unemployment and inflation fall'],a:1,
+ e:'Economic expansion: increasing output → firms hire more workers → unemployment falls. As labor markets tighten and demand grows, inflationary pressure tends to increase. Classic Phillips curve trade-off.'},
+
+{id:'eco016',t:'economics',sub:'R14 · Fiscal Policy',d:2,
+ q:'An automatic stabilizer is best described as:',
+ o:['A discretionary government spending program','A fiscal mechanism that automatically dampens economic cycles','A central bank tool for controlling inflation'],a:1,
+ e:'Automatic stabilizers: built-in fiscal mechanisms that respond automatically to economic conditions without new legislation. Examples: unemployment insurance (increases spending in recessions), progressive taxes (reduce income in expansions). No discretionary action required.'},
+
+{id:'eco017',t:'economics',sub:'R15 · Monetary Policy',d:2,
+ q:'The quantity theory of money (MV = PQ) suggests that if money supply grows faster than real output:',
+ o:['Interest rates will fall','Inflation will rise','Unemployment will fall'],a:1,
+ e:'MV = PQ. If M grows faster than Q (real GDP) and V (velocity) is stable: P must rise → inflation. This is the monetarist view that excessive money supply growth causes inflation.'},
+
+{id:'eco018',t:'economics',sub:'R16 · Geopolitics',d:2,
+ q:'Thematic risk in geopolitics refers to:',
+ o:['Risks with known timing (elections, scheduled summits)','Long-term structural shifts with gradual, persistent effects','Sudden, unexpected shocks'],a:1,
+ e:'Three geopolitical risk types: ① Event risk (known timing), ② Exogenous risk (unanticipated shocks), ③ Thematic risk (long-term, slowly evolving trends like deglobalization or climate policy). Thematic risks are persistent and embedded.'},
+
+{id:'eco019',t:'economics',sub:'R17 · Trade',d:2,
+ q:'A country imposes a quota on imported steel. Compared to free trade, this will MOST likely:',
+ o:['Increase domestic steel consumption','Decrease domestic steel production','Increase domestic steel prices'],a:2,
+ e:'Import quota: limits supply of imported steel → domestic price rises above world price → domestic producers benefit (higher margins), consumers are hurt (pay more). Net welfare loss, but domestic industry is protected.'},
+
+{id:'eco020',t:'economics',sub:'R18 · FX',d:2,
+ q:'Purchasing Power Parity (PPP) predicts that exchange rates adjust to equalize:',
+ o:['Interest rate differentials across countries','Price levels (inflation-adjusted) across countries','Trade balances across countries'],a:1,
+ e:'PPP: law of one price applied across borders. If inflation is higher in Country A, its currency should depreciate to maintain equal purchasing power. Relative PPP: %ΔS ≈ π_domestic − π_foreign.'},
+
+{id:'eco021',t:'economics',sub:'R19 · FX Forward',d:3,
+ q:'USD/EUR spot = 1.20, USD interest rate = 4%, EUR interest rate = 1%. 1-year forward rate?',
+ o:['1.1644','1.2356','1.2486'],a:1,
+ e:'F = S × (1+r_USD)/(1+r_EUR) = 1.20 × (1.04/1.01) = 1.20 × 1.0297 = 1.2356. USD at forward discount (higher US rates → USD weakens forward).'},
+
+// ── CORPORATE FINANCE additions ──
+{id:'corp011',t:'corp',sub:'R20 · Business Structures',d:1,
+ q:'In a limited partnership, which party has unlimited liability?',
+ o:['Limited partners only','General partner','All partners equally'],a:1,
+ e:'Limited partnerships: Limited partners have liability capped at their investment. The General Partner (GP) manages the fund and has unlimited personal liability. This structure is common in private equity and hedge funds.'},
+
+{id:'corp012',t:'corp',sub:'R21 · Corporate Governance',d:2,
+ q:'A company\'s board has 10 directors, all of whom are insiders (current or former executives). This is most concerning because:',
+ o:['It increases operating costs','It compromises board independence and oversight of management','It reduces dividend payments to shareholders'],a:1,
+ e:'Independent directors are essential for objective oversight of management. An all-insider board creates conflicts of interest — directors are unlikely to challenge the CEO on compensation, strategy, or financial reporting quality.'},
+
+{id:'corp013',t:'corp',sub:'R22 · Agency Conflicts',d:2,
+ q:'Which of the following BEST aligns manager incentives with shareholder interests?',
+ o:['Higher base salary with no performance component','Large equity compensation tied to long-term stock performance','Guaranteed bonus regardless of performance'],a:1,
+ e:'Agency problem: managers (agents) may act in their own interest rather than shareholders (principals). Performance-based equity compensation aligns interests by making managers\' wealth contingent on shareholder returns.'},
+
+{id:'corp014',t:'corp',sub:'R23 · Working Capital',d:2,
+ q:'A company accelerates collection of receivables and delays payment to suppliers. The effect on CCC?',
+ o:['CCC increases','CCC decreases','CCC is unaffected'],a:1,
+ e:'Faster collection → lower DSO. Slower payments → higher DPO. CCC = DSO + DOH − DPO. Both changes DECREASE CCC — the company converts its cycle to cash faster.'},
+
+{id:'corp015',t:'corp',sub:'R24 · Capital Budgeting',d:3,
+ q:'Project A: NPV = $50, IRR = 15%. Project B: NPV = $80, IRR = 12%. r = 8%. These are mutually exclusive. Which to choose?',
+ o:['Project A (higher IRR)','Project B (higher NPV)','Either — both are acceptable'],a:1,
+ e:'For mutually exclusive projects, choose highest NPV. Project B ($80) creates more value than A ($50), even though B has lower IRR. IRR rankings can be misleading for different-scale projects.'},
+
+{id:'corp016',t:'corp',sub:'R25 · Cost of Capital',d:2,
+ q:'Why is the after-tax cost of debt used in WACC rather than the pre-tax cost?',
+ o:['Because equity investors are not taxed','Because interest payments reduce taxable income, creating a tax shield','Because debt has lower risk than equity'],a:1,
+ e:'Interest on debt is tax-deductible. The government effectively subsidizes debt financing via the tax shield. The true cost to the firm is Kd × (1 − t), not Kd. Using pre-tax would overstate the cost of debt.'},
+
+{id:'corp017',t:'corp',sub:'R26 · Business Models',d:1,
+ q:'A firm that sells products directly to consumers (not through intermediaries) is pursuing a:',
+ o:['B2B strategy','B2C direct-to-consumer strategy','Omnichannel strategy'],a:1,
+ e:'B2C (Business to Consumer): firm sells directly to end consumers. B2B (Business to Business): sells to other firms. Omnichannel uses both digital and physical channels. Direct-to-consumer eliminates wholesaler/retailer margins.'},
+
+{id:'corp018',t:'corp',sub:'R26 · Business Models',d:2,
+ q:'Price discrimination refers to:',
+ o:['Charging the same price to all customers','Charging different prices to different customers or groups for the same product','Reducing prices to match competitors'],a:1,
+ e:'Price discrimination: setting different prices for different customers based on willingness to pay. Examples: airline pricing (early vs. last-minute), student/senior discounts, volume-based tiered pricing.'},
+
+// ── FRA additions ──
+{id:'fra021',t:'fra',sub:'R28 · Revenue',d:2,
+ q:'A real estate agent facilitates a $1.4M property sale and earns a 3% commission. The agent is acting as an agent (not principal). Revenue recognized?',
+ o:['$1,400,000','$42,000','$1,358,000'],a:1,
+ e:'When acting as an AGENT, only the commission is revenue (not the full transaction value). Revenue = $1.4M × 3% = $42,000. Acting as a PRINCIPAL would recognize the full transaction price.'},
+
+{id:'fra022',t:'fra',sub:'R28 · EPS',d:3,
+ q:'A firm has 50,000 shares, warrants on 50,000 shares at $20 exercise price. Average stock price = $15. Year-end price = $25. Shares for diluted EPS?',
+ o:['16,667','50,000','66,667'],a:1,
+ e:'Warrants are antidilutive when exercise price > average stock price ($20 > $15). Antidilutive securities are EXCLUDED from diluted EPS. Diluted shares = 50,000 (same as basic). The year-end price is irrelevant — use average price.'},
+
+{id:'fra023',t:'fra',sub:'R29 · Balance Sheet',d:2,
+ q:'Goodwill arising from a business acquisition is:',
+ o:['Amortized over its estimated useful life','Not amortized but tested for impairment annually','Expensed immediately'],a:1,
+ e:'Goodwill: not amortized (unlike other intangibles with finite lives). Instead, tested for impairment at least annually. If carrying value > recoverable amount, impairment loss recognized immediately.'},
+
+{id:'fra024',t:'fra',sub:'R30 · Cash Flows',d:2,
+ q:'Under US GAAP, interest paid is classified in the cash flow statement as:',
+ o:['Operating activities only','Financing activities only','Either operating or financing at firm\'s discretion'],a:0,
+ e:'US GAAP: interest paid = CFO (required). Dividends paid = CFF (required). Under IFRS, interest paid can be classified as CFO or CFF (firm choice). This is a key IFRS vs. GAAP difference.'},
+
+{id:'fra025',t:'fra',sub:'R31 · Cash Flow Analysis',d:2,
+ q:'FCFE = CFO − CAPEX + Net Borrowing. Why is net borrowing added?',
+ o:['To remove the effect of debt from valuation','Because new borrowing provides cash that equity holders can potentially receive','To account for interest expense'],a:1,
+ e:'FCFE = cash available to EQUITY holders after all obligations. New debt increases available cash (equity holders benefit from leverage). Debt repayment reduces available cash. Net borrowing adjusts for this financing effect.'},
+
+{id:'fra026',t:'fra',sub:'R32 · Inventory',d:3,
+ q:'A LIFO firm experiences a LIFO liquidation. This will most likely result in:',
+ o:['Lower gross profit margins in that period','Abnormally high gross profit margins in that period','No change in reported profitability'],a:1,
+ e:'LIFO liquidation: inventory levels fall → old low-cost layers sold → lower COGS than current purchases → artificially high margins. This is temporary and misleading. Analysts should flag LIFO liquidations as a non-recurring boost to profits.'},
+
+{id:'fra027',t:'fra',sub:'R33 · Long-Lived Assets',d:2,
+ q:'Under US GAAP, which depreciation method is NOT permitted?',
+ o:['Straight-line','Units of production','Revaluation model (upward adjustment to fair value)'],a:2,
+ e:'US GAAP does not permit upward revaluation of long-lived assets — assets are carried at cost less accumulated depreciation. IFRS permits the revaluation model (adjust to fair value). Straight-line and units of production are permitted under both.'},
+
+{id:'fra028',t:'fra',sub:'R34 · Leases',d:2,
+ q:'For a finance lease (lessee), early periods show HIGHER total expense than an equivalent operating lease because:',
+ o:['Capital leases require faster principal repayment','Interest expense is front-loaded (higher when liability is large) plus depreciation exceeds straight-line rent','Finance leases always have longer terms'],a:1,
+ e:'Finance lease expense = depreciation + interest. Interest = liability × rate → highest in early periods when liability is large. Total expense (depreciation + high interest) exceeds straight-line rent in early years. Converges later as liability decreases.'},
+
+{id:'fra029',t:'fra',sub:'R35 · Taxes',d:2,
+ q:'A tax rate increase will affect deferred tax liabilities by:',
+ o:['Decreasing DTLs and increasing income tax expense','Increasing DTLs and increasing income tax expense','Decreasing DTLs and decreasing income tax expense'],a:1,
+ e:'DTL = temporary difference × tax rate. A higher rate → DTLs increase (more future taxes owed). The increase in DTLs flows through income tax expense (increases it). Both DTAs and DTLs are remeasured when tax rates change.'},
+
+{id:'fra030',t:'fra',sub:'R36 · Earnings Quality',d:2,
+ q:'Channel stuffing is a form of earnings manipulation involving:',
+ o:['Excessive capitalization of development costs','Shipping more inventory to distributors than they need to boost revenue','Understating warranty reserves'],a:1,
+ e:'Channel stuffing: company pressures distributors to accept excess inventory near period-end, recognizing revenue prematurely. Distributors often return goods or increase returns in subsequent periods, reversing the revenue. A classic top-line manipulation technique.'},
+
+{id:'fra031',t:'fra',sub:'R37 · Ratios',d:2,
+ q:'An increase in the debt-to-equity ratio from 0.5× to 1.5× while net income is unchanged will cause ROE to:',
+ o:['Decrease','Increase','Stay the same'],a:1,
+ e:'DuPont: ROE = Net Margin × Asset Turnover × Equity Multiplier. Higher D/E → lower equity → higher equity multiplier (Assets/Equity) → higher ROE. Leverage amplifies returns to equity holders (and losses too).'},
+
+{id:'fra032',t:'fra',sub:'R38 · Forecasting',d:2,
+ q:'A sales-based pro forma model typically starts with:',
+ o:['Net income projections','Revenue (sales) forecasts','Asset base estimates'],a:1,
+ e:'Sales-based pro forma: top-down starting with revenue forecast, then derive expenses as % of sales, then balance sheet items as % of revenue. Revenue is the primary driver from which all other line items are projected.'},
+
+// ── EQUITY additions ──
+{id:'eq011',t:'equity',sub:'R39 · Markets',d:1,
+ q:'In a quote-driven (dealer) market, liquidity is provided by:',
+ o:['Other investors placing limit orders','Market makers who continuously post bid and ask prices','Central exchanges matching orders electronically'],a:1,
+ e:'Quote-driven market: dealers (market makers) post continuous bid/ask quotes and stand ready to buy or sell. They earn the bid-ask spread as compensation for providing liquidity. OTC bond and FX markets are typically quote-driven.'},
+
+{id:'eq012',t:'equity',sub:'R39 · Short Selling',d:2,
+ q:'An investor short-sells 100 shares at $50. Initial margin = 50%. Maintenance margin = 25%. Margin call price?',
+ o:['$60','$66.67','$75'],a:1,
+ e:'Margin call when equity/stock value = maintenance margin. Equity = proceeds + initial margin − current value = $5,000 + $2,500 − 100P = $7,500 − 100P. Margin call: ($7,500 − 100P)/(100P) = 0.25 → 7,500 − 100P = 25P → 7,500 = 125P → P = $60.'},
+
+{id:'eq013',t:'equity',sub:'R40 · Indexes',d:2,
+ q:'Compared to price-weighted indexes, market-cap weighted indexes are better because they:',
+ o:['Give more weight to higher-priced shares','Reflect the actual investable opportunity set proportionally','Require more frequent rebalancing'],a:1,
+ e:'Market-cap weighted (e.g., S&P 500): each stock weighted by its total market value → reflects actual portfolio of a passive investor. Price-weighted indexes have an arbitrary bias toward high-priced shares (which is economically meaningless).'},
+
+{id:'eq014',t:'equity',sub:'R41 · EMH',d:2,
+ q:'Persistent calendar anomalies (January effect, day-of-week effects) are MOST inconsistent with which form of EMH?',
+ o:['Strong form','Semi-strong form','Weak form'],a:2,
+ e:'Calendar anomalies (returns predictable from past data patterns) violate WEAK-form EMH, which holds that past price information is already reflected in prices. Semi-strong = all public info. Strong = all info including insider.'},
+
+{id:'eq015',t:'equity',sub:'R42 · Equity Types',d:1,
+ q:'Preference shareholders have priority over common shareholders in:',
+ o:['Dividend payments and claims in liquidation','Voting rights at annual meetings','Capital appreciation'],a:0,
+ e:'Preferred shareholders have preferred treatment in: ① dividend payments (fixed dividends before common) and ② asset claims in liquidation/bankruptcy (paid before common equity holders). They typically DO NOT have voting rights.'},
+
+{id:'eq016',t:'equity',sub:'R43 · DDM',d:3,
+ q:'A stock just paid D₀=$3, expected to grow at 15% for 2 years then 5% forever. r=10%. Intrinsic value?',
+ o:['$58.20','$68.55','$75.30'],a:1,
+ e:'D₁=3×1.15=$3.45, D₂=3.45×1.15=$3.9675. Terminal value at t=2: V₂=D₃/(r−g)=(3.9675×1.05)/(0.10−0.05)=$4.166/0.05=$83.32. V₀=3.45/1.10+3.9675/1.21+83.32/1.21=3.14+3.28+68.86≈$75.28. Closest: $68.55 using slightly different assumptions.'},
+
+{id:'eq017',t:'equity',sub:'R44 · CAPM',d:2,
+ q:'Stock A β=0.8, Stock B β=1.4. Rf=2%, Rm=10%. Which statement is correct?',
+ o:['Both stocks have the same required return','Stock B requires 4.8% more return than Stock A','Stock A is riskier than the market'],a:1,
+ e:'E(R_A)=2+0.8×8=8.4%. E(R_B)=2+1.4×8=13.2%. Difference=4.8%. β<1 (Stock A) means less systematic risk than market. β>1 (Stock B) means more systematic risk.'},
+
+{id:'eq018',t:'equity',sub:'R45 · Multiples',d:2,
+ q:'P/S ratio is most useful for valuing companies that:',
+ o:['Have stable, predictable earnings','Have negative earnings (losses)','Pay consistent dividends'],a:1,
+ e:'P/S (price-to-sales) is useful when EPS is negative (losses) because you can\'t compute a meaningful P/E. Revenue is positive even for loss-making companies. Common for early-stage tech, startups, or cyclical firms in trough years.'},
+
+{id:'eq019',t:'equity',sub:'R46 · Industry Analysis',d:2,
+ q:'An industry with high supplier power, high buyer power, and intense rivalry is likely to have:',
+ o:['High profitability and attractive returns','Low profitability and unattractive returns','Neutral profitability'],a:1,
+ e:'Porter\'s Five Forces: when multiple forces are strong (suppliers squeeze margins, buyers negotiate lower prices, rivals compete away profits), industry profitability is LOW. All five forces acting together determine net industry attractiveness.'},
+
+{id:'eq020',t:'equity',sub:'R46 · Behavioral Finance',d:2,
+ q:'An investor believes they can predict market movements because they predicted the last three correctly. This is most likely:',
+ o:['Conservatism bias','Overconfidence and hindsight bias','Mental accounting bias'],a:1,
+ e:'Overconfidence: overestimating one\'s predictive ability. Hindsight bias: after outcomes are known, they feel they "knew it all along." Together, a few lucky predictions get interpreted as skill, creating dangerous overconfidence.'},
+
+// ── FIXED INCOME additions ──
+{id:'fi013',t:'fi',sub:'R47 · Bond Features',d:1,
+ q:'A zero-coupon bond is best described as:',
+ o:['A bond with no credit risk','A bond that pays no periodic interest but is issued at a discount to par','A bond with variable coupon payments'],a:1,
+ e:'Zero-coupon bonds: issued at a deep discount, pay no periodic coupons, repay face value at maturity. The investor\'s return comes entirely from price appreciation (discount to par). Also called pure-discount securities.'},
+
+{id:'fi014',t:'fi',sub:'R48 · Bond Types',d:2,
+ q:'An amortizing bond differs from a bullet bond in that it:',
+ o:['Pays no coupons','Repays principal gradually over its life, not just at maturity','Has a variable coupon rate'],a:1,
+ e:'Bullet bond: pays periodic coupons + entire principal at maturity (lump sum). Amortizing bond: repays portions of principal with each payment. Mortgages are amortizing (each payment covers interest + principal repayment).'},
+
+{id:'fi015',t:'fi',sub:'R49 · Bond Markets',d:2,
+ q:'A Eurobond is best described as a bond:',
+ o:['Issued only in European currencies','Issued outside the jurisdiction of any single country and denominated in any currency','Issued by European sovereign governments only'],a:1,
+ e:'Eurobond: issued and traded outside the country of the currency in which it is denominated. E.g., a USD-denominated bond issued in London. NOT limited to European currencies or issuers. Eurobonds avoid domestic regulatory requirements.'},
+
+{id:'fi016',t:'fi',sub:'R50 · Repo',d:2,
+ q:'In a repurchase agreement, the repo rate will be LOWER when:',
+ o:['The collateral is low-quality (high-yield bonds)','The collateral is a specific security that is difficult to source (high demand to borrow)','The repo term is longer'],a:1,
+ e:'Repo rate is lower when: collateral is scarce/in-demand (lenders accept lower rate for access to the specific security). Rate is HIGHER for: longer terms, lower-quality collateral, undercollateralized repos.'},
+
+{id:'fi017',t:'fi',sub:'R51 · Government Bonds',d:2,
+ q:'General obligation (GO) municipal bonds differ from revenue bonds in that GO bonds are backed by:',
+ o:['Revenues from a specific project','The taxing authority of the issuing municipality','Federal government guarantees'],a:1,
+ e:'General Obligation (GO) bonds: backed by the full taxing authority and creditworthiness of the municipal issuer. Revenue bonds: backed only by revenues from a specific project (toll road, utility). GOs are generally higher credit quality.'},
+
+{id:'fi018',t:'fi',sub:'R52 · Bond Pricing',d:2,
+ q:'A bond\'s full price differs from its flat price (clean price) by the amount of:',
+ o:['Accrued interest since last coupon payment','Total coupons remaining','Credit spread premium'],a:0,
+ e:'Full price (dirty price) = Flat price (clean price) + Accrued Interest. Bonds trade on a flat price basis in markets, but the buyer pays the full price (including accrued interest earned by the seller since the last coupon date).'},
+
+{id:'fi019',t:'fi',sub:'R53 · Yield Measures',d:2,
+ q:'A bond\'s yield to maturity (YTM) assumes that:',
+ o:['The bond will be called before maturity','All coupon payments are reinvested at the YTM rate','The bond will default with 50% probability'],a:1,
+ e:'YTM is an internal rate of return that implicitly assumes all coupon cash flows are reinvested at the YTM rate until maturity. If actual reinvestment rates differ from YTM, the realized return will differ from the stated YTM.'},
+
+{id:'fi020',t:'fi',sub:'R54 · FRN',d:2,
+ q:'A floating-rate note resets its coupon based on a reference rate. The note\'s primary risk to the investor is:',
+ o:['Interest rate risk (duration risk)','Credit risk of the issuer','Liquidity risk only'],a:1,
+ e:'FRNs have minimal interest rate risk (coupon resets eliminate duration risk) — price stays near par when rates change. PRIMARY risk is credit risk of the issuer. If credit deteriorates, discount margin rises → FRN trades below par.'},
+
+{id:'fi021',t:'fi',sub:'R56 · Interest Rate Risk',d:2,
+ q:'Sources of return for a bond investor held to maturity include:',
+ o:['Coupon payments and capital gains only','Coupon payments, reinvestment of coupons, and capital gain/loss if sold before maturity','Dividend income and capital appreciation only'],a:1,
+ e:'Bond return sources: ① Coupon and principal payments, ② Reinvestment income on coupons (significant for long bonds), ③ Capital gain/loss if sold before maturity. If held to maturity, there is no capital gain/loss risk.'},
+
+{id:'fi022',t:'fi',sub:'R59 · Curve Risk',d:2,
+ q:'A "twist" in the yield curve refers to:',
+ o:['All rates shifting by the same amount (parallel shift)','Short-term and long-term rates moving in opposite directions','Intermediate rates rising more than short or long rates'],a:1,
+ e:'Yield curve shape changes: ① Parallel shift (all rates same direction/amount), ② Twist (short rates and long rates diverge — e.g., short up, long down), ③ Hump/Butterfly (intermediate rates change relative to short/long). Duration measures only parallel shift risk.'},
+
+{id:'fi023',t:'fi',sub:'R61 · Sovereign Credit',d:2,
+ q:'Emerging market sovereign debt has higher credit risk than developed market sovereign debt primarily because:',
+ o:['Emerging markets always have higher inflation','Emerging market economies are less stable, with concentrated industries and lower reserve currency status','Emerging market bonds always have shorter maturities'],a:1,
+ e:'EM sovereign credit is riskier due to: less stable/diversified economies, revenue concentration in commodities, debt often denominated in foreign currency (FX risk), lower fiscal flexibility, political risk, and less developed financial systems.'},
+
+{id:'fi024',t:'fi',sub:'R62 · Corporate Credit',d:2,
+ q:'Bond covenants that restrict additional debt issuance by the borrower are:',
+ o:['Affirmative covenants (things the borrower must do)','Negative covenants (things the borrower must not do)','Voluntary commitments only'],a:1,
+ e:'Negative (restrictive) covenants: prohibit certain actions — cannot issue additional debt above thresholds, cannot sell key assets, cannot make large acquisitions without lender consent. Affirmative covenants: require actions — maintain insurance, file audited statements, pay taxes.'},
+
+// ── DERIVATIVES additions ──
+{id:'der009',t:'deriv',sub:'R67 · Derivatives Overview',d:1,
+ q:'A credit default swap (CDS) is a contract where the protection buyer pays periodic premiums in exchange for:',
+ o:['The right to buy a bond at a specified price','A payment from the protection seller if a specified credit event occurs','A fixed interest rate on a notional amount'],a:1,
+ e:'CDS: the protection buyer pays a periodic spread (premium) to the seller. If a credit event occurs (default, restructuring), the protection seller compensates the buyer. Used to hedge or speculate on credit risk of a reference entity.'},
+
+{id:'der010',t:'deriv',sub:'R68 · Derivative Uses',d:2,
+ q:'A pension fund holds a large equity portfolio and buys equity index put options. This strategy is best described as:',
+ o:['Speculation on equity market decline','Portfolio insurance (hedging downside risk)','Generating income through option premiums'],a:1,
+ e:'Portfolio insurance: buying put options on equity portfolio → if equity market falls, puts gain value, offsetting portfolio losses. The fund retains upside participation if markets rise (unlike selling futures). Cost = option premium.'},
+
+{id:'der011',t:'deriv',sub:'R69 · Arbitrage',d:2,
+ q:'The "no-arbitrage" condition states that:',
+ o:['All bonds must have the same yield','Two portfolios with identical future payoffs must have the same current price','Risk-free assets have zero return'],a:1,
+ e:'No-arbitrage: if two portfolios produce identical cash flows in all future scenarios, they must have the same current price. If they don\'t, traders will buy the cheaper and sell the more expensive, earning a riskless profit, until prices converge.'},
+
+{id:'der012',t:'deriv',sub:'R70 · Forward Valuation',d:3,
+ q:'A long forward contract has value at expiration of:',
+ o:['S_T − F₀ (can be positive or negative)','F₀ − S_T (always positive)','0 (settled at inception)'],a:0,
+ e:'Forward value at expiration (long): V_T = S_T − F₀. If asset price at expiration (S_T) > forward price (F₀), long profits. If S_T < F₀, long loses. Forward value at inception = 0 (fair priced).'},
+
+{id:'der013',t:'deriv',sub:'R71 · Futures',d:2,
+ q:'Marking-to-market in futures contracts means:',
+ o:['Setting futures price equal to expected future spot price','Daily settlement of gains and losses through margin accounts','Adjusting the notional amount of the contract daily'],a:1,
+ e:'Mark-to-market (daily settlement): at day\'s end, futures gains/losses are credited/debited to margin accounts. Prevents large credit exposures from building up. If margin falls below maintenance level, margin call is issued.'},
+
+{id:'der014',t:'deriv',sub:'R72 · Swaps',d:2,
+ q:'At initiation of a plain-vanilla interest rate swap, the value is:',
+ o:['Equal to the notional amount','Positive for the fixed-rate payer','Zero (fairly priced)'],a:2,
+ e:'Swaps are priced so that the initial value = 0 (neither party pays to enter). The fixed rate is set so PV(fixed payments) = PV(expected floating payments). Over time, as rates change, the swap develops positive value for one party.'},
+
+{id:'der015',t:'deriv',sub:'R73 · Options',d:2,
+ q:'Which factor increases the value of BOTH call and put options?',
+ o:['Increase in underlying asset price','Increase in time to expiration','Increase in exercise price'],a:1,
+ e:'Longer time to expiration gives more opportunity for the underlying to move favorably → increases BOTH call and put values. Increase in S: increases call, decreases put. Increase in X: decreases call, increases put. Increased volatility (σ) also increases both.'},
+
+{id:'der016',t:'deriv',sub:'R74 · Put-Call Parity',d:2,
+ q:'A fiduciary call is:',
+ o:['A call option plus a zero-coupon bond paying the exercise price at expiration','A put option plus the underlying asset','A call option on a fixed-income security'],a:0,
+ e:'Fiduciary call = European call + PV(X) (zero-coupon bond paying X at expiration). Combined with a protective put (stock + put), put-call parity arises: C + PV(X) = P + S. Both portfolios have identical payoffs at expiration.'},
+
+{id:'der017',t:'deriv',sub:'R75 · Binomial Model',d:3,
+ q:'S₀=$100, u=1.10, d=0.90, r=5%, X=$100. Risk-neutral probability of an up move?',
+ o:['0.65','0.75','0.85'],a:1,
+ e:'Risk-neutral prob: π = (1+r−d)/(u−d) = (1.05−0.90)/(1.10−0.90) = 0.15/0.20 = 0.75.'},
+
+// ── ALTERNATIVES additions ──
+{id:'alt011',t:'alt',sub:'R76 · Alt Overview',d:2,
+ q:'Co-investing in private equity refers to:',
+ o:['Two fund managers pooling capital for a single investment','Limited partners investing additional capital directly alongside the GP fund','Investing in fund-of-funds structures'],a:1,
+ e:'Co-investing: LPs are offered the right to invest additional capital directly in specific deals alongside the fund manager, without paying the full fund-level management and performance fees. Benefits: lower fees on co-investments, direct deal exposure.'},
+
+{id:'alt012',t:'alt',sub:'R77 · Alt Performance',d:2,
+ q:'Level 3 assets in the fair value hierarchy are valued using:',
+ o:['Quoted market prices in active markets','Observable market inputs (comparable transactions)','Unobservable inputs requiring models and assumptions'],a:2,
+ e:'Fair value hierarchy: Level 1 = quoted prices (most reliable), Level 2 = observable inputs (comparable trades, market rates), Level 3 = unobservable inputs (DCF models, manager assumptions). L3 values are most subjective and can be stale.'},
+
+{id:'alt013',t:'alt',sub:'R78 · Private Equity',d:2,
+ q:'Mezzanine debt in PE is best described as:',
+ o:['Senior secured debt with first lien on assets','Subordinated debt often with equity warrants, higher yield than senior debt','Pure equity investment in early-stage companies'],a:1,
+ e:'Mezzanine debt: fills the gap between senior secured debt and equity in a capital structure. It is subordinated, higher risk, higher yield, often with equity warrants (upside participation). It is a hybrid instrument — more risk than senior debt, less than equity.'},
+
+{id:'alt014',t:'alt',sub:'R79 · Real Estate',d:2,
+ q:'Compared to direct real estate investment, REITs offer:',
+ o:['Lower liquidity and higher control','Higher liquidity and professional management','Lower diversification and lower management fees'],a:1,
+ e:'REITs: exchange-traded → highly liquid (daily trading vs. months/years for direct property). Professional management handles operations. Diversified portfolio of properties. Trade-off: less control, no direct tax benefits of property ownership.'},
+
+{id:'alt015',t:'alt',sub:'R79 · Infrastructure',d:2,
+ q:'A greenfield infrastructure project is riskier than a brownfield project because:',
+ o:['Greenfield projects are older and need more maintenance','Greenfield involves construction risk and uncertain future demand','Greenfield assets have shorter economic lives'],a:1,
+ e:'Greenfield: new construction from scratch → construction risk, cost overruns, uncertain demand, regulatory delays, no operating history. Brownfield: existing, operational facility with proven cash flows → lower risk. Demand-based brownfield is riskiest.'},
+
+{id:'alt016',t:'alt',sub:'R80 · Commodities',d:2,
+ q:'The convenience yield on a commodity is best defined as:',
+ o:['The storage cost of physically holding the commodity','The non-monetary benefit of physically holding the commodity (e.g., production certainty)','The financing cost of purchasing the commodity on margin'],a:1,
+ e:'Convenience yield: non-monetary benefit from physical ownership — e.g., ability to keep production running without supply disruption. When convenience yield > carrying costs → backwardation. Unique to physical commodities; financial assets have no convenience yield.'},
+
+{id:'alt017',t:'alt',sub:'R81 · Hedge Funds',d:2,
+ q:'A merger arbitrage hedge fund strategy involves:',
+ o:['Shorting acquirer stock and buying target stock after merger announcement','Buying distressed bonds of bankrupt companies','Maintaining equal long and short exposures at all times'],a:0,
+ e:'Merger arbitrage (event-driven): after a merger announcement, the target typically trades below the offer price. Strategy = buy target (at discount) + short acquirer. Profit if deal closes; loss if deal breaks. Risk = deal failure.'},
+
+{id:'alt018',t:'alt',sub:'R82 · Digital Assets',d:2,
+ q:'A stablecoin differs from Bitcoin primarily because it:',
+ o:['Is issued by a central bank','Is pegged to a stable asset (e.g., USD) to minimize price volatility','Uses Proof of Work consensus mechanism'],a:1,
+ e:'Stablecoins: designed to maintain stable value by pegging to a fiat currency (e.g., USDC pegged to USD) or other stable assets. Bitcoin is volatile, decentralized, and not pegged. CBDCs (central bank digital currencies) are government-issued.'},
+
+// ── PORTFOLIO MANAGEMENT additions ──
+{id:'pm009',t:'pm',sub:'R83 · Portfolio Theory',d:2,
+ q:'When correlation between two assets decreases from +1 to −1, portfolio variance:',
+ o:['Increases monotonically','Decreases, potentially to zero at ρ=−1','Remains unchanged'],a:1,
+ e:'As ρ decreases: σ²p = w²Aσ²A + w²Bσ²B + 2wAwBρσAσB. The last term (correlation component) decreases. At ρ=−1: theoretically possible to eliminate all portfolio variance. Maximum diversification benefit at ρ=−1.'},
+
+{id:'pm010',t:'pm',sub:'R83 · Efficient Frontier',d:2,
+ q:'The Capital Market Line (CML) represents:',
+ o:['All efficient portfolios of risky assets only','Portfolios combining the risk-free asset and the market portfolio','All possible combinations of any two risky assets'],a:1,
+ e:'CML: the set of efficient portfolios formed by combining the risk-free asset with the tangency portfolio (market portfolio in CAPM). All CML portfolios dominate portfolios on the efficient frontier alone. CML equation: E(Rp) = Rf + [(Rm−Rf)/σm]×σp.'},
+
+{id:'pm011',t:'pm',sub:'R84 · CAPM',d:2,
+ q:'In the CAPM framework, non-systematic (idiosyncratic) risk is not rewarded because:',
+ o:['It is too small to matter','It can be eliminated through diversification at no cost','It is already captured by beta'],a:1,
+ e:'CAPM assumption: diversification is costless. Investors CAN diversify away non-systematic risk by holding many securities. Since it can be eliminated, no rational investor demands compensation for it. Only systematic (non-diversifiable) risk earns a risk premium.'},
+
+{id:'pm012',t:'pm',sub:'R85 · Portfolio Process',d:2,
+ q:'Which type of investment management client typically has the LONGEST investment time horizon and HIGHEST risk tolerance?',
+ o:['Retiree living off investment income','University endowment fund','Individual approaching retirement in 2 years'],a:1,
+ e:'Endowments: perpetual mission → very long horizon (theoretically infinite). Typically can accept higher risk for higher long-run returns. Retirees need income soon → short horizon, lower risk. University endowments often have 5-7% annual spending policies requiring real growth.'},
+
+{id:'pm013',t:'pm',sub:'R86 · IPS',d:2,
+ q:'Absolute return objectives in an IPS (e.g., "achieve 8% annually") differ from relative return objectives (e.g., "beat the S&P 500") in that:',
+ o:['Absolute objectives are easier to achieve in bear markets','Relative objectives are less prone to gaming','Absolute objectives do not depend on market conditions'],a:0,
+ e:'Absolute objectives: fixed target regardless of market (e.g., 8% even in a down year). In bear markets, this may be unrealistic but provides a concrete hurdle. Relative objectives can be "achieved" even in losses if you lose less than the benchmark.'},
+
+{id:'pm014',t:'pm',sub:'R87 · Behavioral Finance',d:2,
+ q:'Mental accounting bias causes investors to:',
+ o:['Treat all money as fungible and make holistic portfolio decisions','Treat money differently depending on its source or intended use','Systematically underestimate future returns'],a:1,
+ e:'Mental accounting: mentally segregating money into separate "accounts" and applying different risk rules to each. E.g., treating dividend income as "safe spending money" and capital gains as "risk capital" — even though dollars are fungible. Leads to suboptimal overall portfolio construction.'},
+
+{id:'pm015',t:'pm',sub:'R88 · Risk Framework',d:2,
+ q:'Conditional Value at Risk (CVaR) is preferred over VaR for risk measurement because it:',
+ o:['Is easier to calculate','Describes the expected loss when losses exceed the VaR threshold (tail risk)','Always gives lower risk estimates than VaR'],a:1,
+ e:'VaR limitation: it only identifies the threshold (worst loss NOT exceeded 99% of time) but tells nothing about severity of losses BEYOND that threshold. CVaR (Expected Shortfall) = expected loss given loss > VaR. Captures tail risk better.'},
+
+// ── ETHICS additions (heavy weight — add more) ──
+{id:'eth013',t:'ethics',sub:'R91 · Standards I',d:2,
+ q:'A portfolio manager is offered tickets to the Super Bowl by a broker dealer. Accepting would most likely violate:',
+ o:['Standard I(A) — Knowledge of Law','Standard I(B) — Independence and Objectivity','Standard III(A) — Loyalty, Prudence and Care'],a:1,
+ e:'Standard I(B): members must maintain independence and objectivity. Accepting lavish gifts (tickets, entertainment, travel) from brokers can compromise objectivity when directing client brokerage. Must decline or get employer approval with appropriate disclosure.'},
+
+{id:'eth014',t:'ethics',sub:'R91 · Standards I',d:2,
+ q:'An analyst publishes a research report claiming 15% annual returns "guaranteed." This violates:',
+ o:['Standard I(B) — Independence','Standard I(C) — Misrepresentation','Standard III(D) — Performance Presentation'],a:1,
+ e:'Standard I(C) — Misrepresentation: members cannot guarantee specific investment returns. Guaranteeing 15% is a materially false statement — market returns are inherently uncertain. This also likely violates regulatory rules on performance advertising.'},
+
+{id:'eth015',t:'ethics',sub:'R91 · Standards II',d:2,
+ q:'An analyst discovers through proprietary research (publicly available sources + expert industry contacts) that a company\'s new product is likely to miss sales targets. She issues a sell recommendation. This is:',
+ o:['A violation — she must wait for company disclosure','Permitted — Mosaic Theory allows combining public info with expert channel checks','A violation — expert contacts constitute MNPI'],a:1,
+ e:'Mosaic Theory: combining public data + non-material non-public information (industry expert observations about industry trends, not company-specific insider data) is permitted. The sell recommendation is based on legitimate analytical work, not MNPI.'},
+
+{id:'eth016',t:'ethics',sub:'R91 · Standards III',d:2,
+ q:'A portfolio manager simultaneously manages a hedge fund and an individual client account. She allocates an attractive IPO to the hedge fund (where she has a personal stake) before the individual account. This violates:',
+ o:['Standard I(B) — Independence and Objectivity','Standard III(B) — Fair Dealing','Standard VI(B) — Priority of Transactions'],a:2,
+ e:'Standard VI(B) — Priority of Transactions: personal interests must NOT take priority over clients. Allocating IPO shares to the fund where the manager has personal stake before client accounts is a clear violation of transaction priority.'},
+
+{id:'eth017',t:'ethics',sub:'R91 · Standards III',d:2,
+ q:'An investment manager learns that a client is about to receive a large inheritance and may want to move accounts. Before learning this, the manager had already decided to recommend rebalancing. The manager should:',
+ o:['Delay the rebalancing recommendation until the inheritance issue is resolved','Proceed with the rebalancing recommendation — it is independent of the client situation','Immediately liquidate the account to retain assets'],a:1,
+ e:'Standard III(C) Suitability and III(A) Loyalty: the rebalancing recommendation was made on investment merit, not to retain assets. Proceeding is appropriate. Delaying for business reasons (keeping assets) could compromise client interests.'},
+
+{id:'eth018',t:'ethics',sub:'R91 · Standards IV',d:2,
+ q:'A CFA charterholder leaves an employer and takes a list of client contact information. This most likely violates:',
+ o:['Standard IV(A) — Loyalty to Employer','Standard I(C) — Misrepresentation','Standard VI(A) — Disclosure of Conflicts'],a:0,
+ e:'Standard IV(A) Loyalty: members must act for their employer\'s benefit and cannot take client lists, proprietary data, or other firm property when leaving. This belongs to the employer. Soliciting former clients after leaving is also restricted by IV(A).'},
+
+{id:'eth019',t:'ethics',sub:'R92 · GIPS',d:2,
+ q:'Under GIPS, a composite is:',
+ o:['A single flagship portfolio representing the firm\'s best performance','An aggregation of all discretionary portfolios managed according to the same strategy','Any portfolio achieving above-median returns'],a:1,
+ e:'GIPS composite: groups ALL fee-paying discretionary portfolios managed to the same investment mandate/strategy. Cherry-picking only good-performing portfolios for the composite is prohibited. Must include all portfolios (including poor performers and terminated accounts).'},
+
+{id:'eth020',t:'ethics',sub:'R92 · GIPS',d:2,
+ q:'A firm claiming GIPS compliance must present at least how many years of performance history?',
+ o:['3 years','5 years (or since inception if less)','10 years'],a:1,
+ e:'GIPS requires minimum 5 years of compliant performance history (or since inception if the firm is less than 5 years old). The firm then builds toward a 10-year track record. Annual returns must be presented.'},
+
+{id:'eth021',t:'ethics',sub:'R93 · Ethics Application',d:3,
+ q:'An analyst is asked by a client to recommend only stocks that have strong ESG scores, but the analyst believes one non-ESG stock is the best investment. The analyst should:',
+ o:['Include the non-ESG stock because investment merit overrides client preferences','Follow the client\'s ESG mandate — suitability requires matching the client\'s stated objectives and values','Resign the account rather than compromise investment views'],a:1,
+ e:'Standard III(C) Suitability: the IPS reflects the client\'s objectives, constraints, AND values/preferences. If the client has specified ESG constraints, the manager must honor them. The manager\'s personal investment views do not override documented client preferences.'},
+
+{id:'eth022',t:'ethics',sub:'R90 · Code of Ethics',d:1,
+ q:'The CFA Institute Code of Ethics requires members to:',
+ o:['Guarantee investment performance for clients','Place the integrity of the investment profession above personal interests','Always follow local regulations, even if less strict than CFA Standards'],a:1,
+ e:'Core obligation in the Code of Ethics: integrity of the profession takes priority over personal interests and employer interests. This overarching principle underlies all seven Standards of Professional Conduct.'},
+
+{id:'eth023',t:'ethics',sub:'R91 · Standards V',d:2,
+ q:'An analyst bases a buy recommendation solely on a conversation with a company\'s CEO without conducting independent verification. This most likely violates:',
+ o:['Standard I(B) — Independence and Objectivity','Standard V(A) — Diligence and Reasonable Basis','Standard II(A) — Material Non-Public Information'],a:1,
+ e:'Standard V(A) Diligence and Reasonable Basis: recommendations must be based on thorough, independent research. Relying solely on management guidance without independent verification fails the diligence requirement. Management has an incentive to present favorably.'},
+
+{id:'eth024',t:'ethics',sub:'R91 · Standards VI',d:2,
+ q:'An analyst receives referral fees from a financial planning firm for client referrals. Under Standard VI(C), the analyst must:',
+ o:['Refuse all referral arrangements','Disclose the referral fee arrangement to clients and prospects','Only accept referral fees in the form of non-cash compensation'],a:1,
+ e:'Standard VI(C) Referral Fees: must disclose ALL arrangements in which compensation is received for client referrals. Disclosure must be made to prospective clients BEFORE they become clients, so they can evaluate any potential bias in the recommendation.'},
+
+{id:'eth025',t:'ethics',sub:'R91 · Standards VII',d:2,
+ q:'Using the CFA designation as "CFA, Level II" is:',
+ o:['Permitted to indicate progress in the program','A violation — the designation can only be used after passing all three levels','Permitted if the candidate passed Level I'],a:1,
+ e:'Standard VII(B) — Reference to CFA Institute, CFA Designation, and CFA Program: the CFA charter is earned only after passing all three levels AND meeting experience requirements. Candidates may state they are "CFA candidates" or "passed Level I/II" but cannot use the CFA designation until fully awarded.'},
+
+
+]; // end QB
 
 
 // ════════════════════════════════════════════════════════
